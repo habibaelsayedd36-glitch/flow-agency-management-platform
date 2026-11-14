@@ -6,6 +6,7 @@ import { apiError, assertSameOrigin, optionalText, requireText } from "@/lib/api
 import { assertOrganizationAccess, canManageWork, requireActiveAccount, requireAuth } from "@/lib/authorization";
 import { writeActivity, writeAudit } from "@/lib/audit";
 import { FLOW_WORKFLOW } from "@/lib/workflow";
+import { ensureFlowCatalog } from "@/lib/catalog";
 
 const marketplaceNames = new Set(["Amazon", "Noon", "Jumia", "Shopify", "InstaShop", "Other"]);
 const productStatuses = ["submitted", "initial_review", "waiting_information", "photography_scheduled", "photography_in_progress", "image_editing", "content_creation", "internal_quality_review", "awaiting_client_approval", "revision_requested", "approved", "ready_for_publishing", "published", "completed"] as const;
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth(request, ["client", "admin", "account_manager", "production_manager"]);
     requireActiveAccount(user);
     const body = await request.json();
+    await ensureFlowCatalog();
     const organizationId = user.role === "client" ? user.organizationId : requireText(body.organizationId, "Workspace", 80);
     if (!organizationId) return NextResponse.json({ error: "A client workspace is required." }, { status: 400 });
     await assertOrganizationAccess(user, organizationId);
