@@ -71,7 +71,7 @@ export function PortalModal({ modal, user, organization, language, onClose, onDo
         await requestJson("/api/products", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
           organizationId: currentOrganizationId,
           name: get("name"), sku: get("sku"), brand: get("brand"), category: get("category"), productType: get("productType"), description: get("description"),
-          targetMarketplace: get("targetMarketplace"), projectId: get("projectId") || null, requiredServices, clientInstructions: get("clientInstructions"),
+          targetMarketplaces: data.getAll("targetMarketplaces").map(String), projectId: get("projectId") || null, requiredServices, clientInstructions: get("clientInstructions"),
         }) });
         onDone("Product submitted to your FLOW workspace.");
       } else if (modal.type === "project") {
@@ -98,7 +98,7 @@ export function PortalModal({ modal, user, organization, language, onClose, onDo
         if (!response.ok) throw new Error(result.error || "Upload failed.");
         onDone(`${file.name} uploaded as version ${result.file.versionNumber}.`);
       } else if (modal.type === "client") {
-        await requestJson("/api/clients", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ companyName: get("companyName"), fullName: get("fullName"), email: get("email"), phone: get("phone"), category: get("category"), password: get("password"), preferredLanguage: get("preferredLanguage") }) });
+        await requestJson("/api/clients", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ companyName: get("companyName"), fullName: get("fullName"), email: get("email"), phone: get("phone"), category: get("category"), password: get("password"), preferredLanguage: get("preferredLanguage"), website: get("website") }) });
         onDone("Client workspace created in review. Email delivery status is shown in the client record.");
       } else if (modal.type === "team") {
         await requestJson("/api/team", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fullName: get("fullName"), email: get("email"), password: get("password"), role: get("role"), department: get("department"), title: get("title"), phone: get("phone") }) });
@@ -137,7 +137,7 @@ export function PortalModal({ modal, user, organization, language, onClose, onDo
           <TextField label="Product name" name="name" required placeholder="e.g. Ceramic storage jar" />
           <div className="form-grid-two"><TextField label="SKU" name="sku" placeholder="Optional internal code" /><TextField label="Brand" name="brand" placeholder="Brand name" /></div>
           <div className="form-grid-two"><TextField label="Category" name="category" placeholder="Home & kitchen" /><TextField label="Product type" name="productType" placeholder="e.g. Kitchen storage" /></div>
-          <div className="form-grid-two"><label className="field-label">Target marketplace<select name="targetMarketplace" defaultValue=""><option value="">Choose a marketplace</option><option>Amazon</option><option>Noon</option><option>TikTok Shop</option><option>Shopify</option><option>InstaShop</option><option>Other</option></select></label><label className="field-label">Project (optional)<select name="projectId" defaultValue=""><option value="">No project linked</option>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label></div>
+          <div className="form-grid-two"><fieldset className="choice-field"><legend>Marketplaces · select all that apply</legend><div className="choice-row">{["Amazon", "Noon", "Jumia", "Shopify", "InstaShop", "Other"].map((item) => <label key={item} className="choice-chip"><input type="checkbox" name="targetMarketplaces" value={item} />{item}</label>)}</div></fieldset><label className="field-label">Project (optional)<select name="projectId" defaultValue=""><option value="">No project linked</option>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label></div>
           <label className="field-label">Product description<textarea name="description" rows={3} placeholder="What should our team know about this product?" /></label>
           <fieldset className="choice-field"><legend>Services needed</legend><div className="choice-row">{[["product-photography", "Photography"], ["bilingual-listing", "Bilingual listing"], ["marketplace-account-management", "Account support"]].map(([key, label]) => <button key={key} type="button" className={`choice-chip ${requiredServices.includes(key) ? "selected" : ""}`} onClick={() => setRequiredServices((current) => current.includes(key) ? current.filter((item) => item !== key) : [...current, key])}>{requiredServices.includes(key) && <Icon name="check" size={12} />}{label}</button>)}</div></fieldset>
           <TextField label="Instructions for FLOW" name="clientInstructions" rows={2} placeholder="Handling, styling or compliance notes…" />
@@ -171,7 +171,7 @@ export function PortalModal({ modal, user, organization, language, onClose, onDo
           <TextField label="Company name" name="companyName" required placeholder="Client company" />
           <div className="form-grid-two"><TextField label="Contact person" name="fullName" required placeholder="Full name" /><TextField label="Phone" name="phone" placeholder="+20 …" /></div>
           <div className="form-grid-two"><TextField label="Email" name="email" type="email" required placeholder="client@company.com" /><TextField label="Business category" name="category" placeholder="Category" /></div>
-          <div className="form-grid-two"><TextField label="Temporary password" name="password" type="password" required placeholder="At least 12 characters" /><label className="field-label">Preferred language<select name="preferredLanguage" defaultValue="en"><option value="en">English</option><option value="ar">Arabic</option></select></label></div>
+          <TextField label="Website (optional)" name="website" type="url" placeholder="https://www.company.com" /><div className="form-grid-two"><TextField label="Temporary password" name="password" type="password" required placeholder="At least 12 characters" /><label className="field-label">Preferred language<select name="preferredLanguage" defaultValue="en"><option value="en">English</option><option value="ar">Arabic</option></select></label></div>
         </>}
 
         {modal.type === "team" && <>
