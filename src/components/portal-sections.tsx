@@ -105,7 +105,7 @@ export function PortalSections(props: Props) {
   if (view === "payments") return <PaymentsView payments={data.payments || []} language={language} />;
   if (view === "messages") return <MessagesView conversations={data.conversations || []} user={user} language={language} onToast={onToast} onRefresh={onRefresh} />;
   if (view === "reports") return <ReportsView data={data} language={language} />;
-  if (view === "clients") return <ClientsView clients={data.clients || []} onToast={onToast} onRefresh={onRefresh} />;
+  if (view === "clients") return <ClientsView clients={data.clients || []} language={language} onToast={onToast} onRefresh={onRefresh} />;
   if (view === "deals") return <DealsView user={user} language={language} onToast={onToast} onRefresh={onRefresh} />;
   if (view === "team") return <TeamView team={data.team || []} onToast={onToast} onRefresh={onRefresh} />;
   if (view === "subscriptions") return <SubscriptionsView data={data} user={user} language={language} onOpenModal={onOpenModal} onToast={onToast} onRefresh={onRefresh} />;
@@ -165,6 +165,7 @@ function ProductsView({ products, user, language, onOpenModal, onToast, onRefres
 }
 
 function ProductDetail({ productId, user, language, onBack, onOpenModal, onToast, onRefresh }: { productId: string; user: AuthUserView; language: "en" | "ar"; onBack: () => void; onOpenModal: Props["onOpenModal"]; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [detail, setDetail] = useState<PortalRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -187,7 +188,7 @@ function ProductDetail({ productId, user, language, onBack, onOpenModal, onToast
   const canChange = ["admin", "account_manager", "production_manager", "photographer", "content_creator"].includes(user.role);
   return <div className="product-detail-view"><div className="detail-back-row"><button type="button" className="subtle-link" onClick={onBack}><Icon name="arrow" size={14} className="back-arrow" />Back to products</button><div className="detail-actions">{isStaff && <button type="button" className="button button-secondary button-small" onClick={() => onOpenModal("upload", { productId, organizationId: product.organizationId })}><Icon name="upload" size={14} />Upload version</button>}{isStaff && <button type="button" className="button button-primary button-small" onClick={() => onOpenModal("content", { id: productId, name: product.name })}><Icon name="file" size={14} />New listing version</button>}</div></div>
     <div className="detail-grid"><div className="detail-column"><section className="detail-card"><div className="detail-title-row"><div><span className="section-label">PRODUCT PROFILE · {product.sku || "SKU NOT SET"}</span><h2>{product.name}</h2><p>{[product.brand, product.category].filter(Boolean).join(" · ") || t("Category not set", "لم يتم تحديد الفئة")}</p></div><Badge status={product.status} /></div><div className="detail-list"><div><span>Marketplace</span><b>{product.targetMarketplace || t("Not selected", "غير محدد")}</b></div><div><span>Product type</span><b>{product.productType || t("Not set", "غير محدد")}</b></div><div><span>Submitted</span><b>{formatDate(product.createdAt, language)}</b></div><div><span>Project</span><b>{product.projectId ? t("Linked project", "مشروع مرتبط") : t("Not linked", "غير مرتبط")}</b></div><div><span>Weight</span><b>{product.weight || t("Not specified", "غير محدد")}</b></div><div><span>Materials</span><b>{product.materials || t("Not specified", "غير محدد")}</b></div></div>{product.description && <div className="product-description"><span className="section-label">DESCRIPTION</span><p>{product.description}</p></div>}{product.clientInstructions && <div className="product-description"><span className="section-label">CLIENT INSTRUCTIONS</span><p>{product.clientInstructions}</p></div>}{isStaff && product.internalNotes && <div className="internal-note"><span className="section-label">INTERNAL NOTE · FLOW ONLY</span><p>{product.internalNotes}</p></div>}</section>
-      <section className="detail-card"><div className="section-header"><div><span className="section-label">FILES & VERSIONS</span><h3>Product gallery</h3></div><span className="status-badge">{files.length} version{files.length === 1 ? "" : "s"}</span></div>{files.length ? <div className="file-version-list">{files.map((file: PortalRow) => <div className="file-version-row" key={file.id}><span className="file-tile"><Icon name={file.contentType?.startsWith("image/") ? "camera" : "file"} size={17} /></span><span className="file-version-copy"><b>{file.fileName}</b><small>Version {file.versionNumber} · {formatDate(file.createdAt, language)} · {Math.max(1, Math.round(file.fileSize / 1024))} KB</small></span><Badge status={file.category} /><a className="icon-button" href={`/api/files/${file.id}`} aria-label={`Download ${file.fileName}`}><Icon name="download" size={15} /></a></div>)}</div> : <Empty icon="camera" title=t("No files yet", "لا توجد ملفات حتى الآن") description=t("Source images and deliverables will appear here as new versions are uploaded.", "ستظهر الصور الأصلية وملفات التسليم هنا عند رفع نسخ جديدة.") action={isStaff ? () => onOpenModal("upload", { productId, organizationId: product.organizationId }) : undefined} actionLabel={isStaff ? t("Upload a file", "رفع ملف") : undefined} />}</section>
+      <section className="detail-card"><div className="section-header"><div><span className="section-label">FILES & VERSIONS</span><h3>Product gallery</h3></div><span className="status-badge">{files.length} version{files.length === 1 ? "" : "s"}</span></div>{files.length ? <div className="file-version-list">{files.map((file: PortalRow) => <div className="file-version-row" key={file.id}><span className="file-tile"><Icon name={file.contentType?.startsWith("image/") ? "camera" : "file"} size={17} /></span><span className="file-version-copy"><b>{file.fileName}</b><small>Version {file.versionNumber} · {formatDate(file.createdAt, language)} · {Math.max(1, Math.round(file.fileSize / 1024))} KB</small></span><Badge status={file.category} /><a className="icon-button" href={`/api/files/${file.id}`} aria-label={`Download ${file.fileName}`}><Icon name="download" size={15} /></a></div>)}</div> : <Empty icon="camera" title={t("No files yet", "لا توجد ملفات حتى الآن")} description={t("Source images and deliverables will appear here as new versions are uploaded.", "ستظهر الصور الأصلية وملفات التسليم هنا عند رفع نسخ جديدة.")} action={isStaff ? () => onOpenModal("upload", { productId, organizationId: product.organizationId }) : undefined} actionLabel={isStaff ? t("Upload a file", "رفع ملف") : undefined} />}</section>
       <section className="detail-card"><div className="section-header"><div><span className="section-label">BILINGUAL LISTING</span><h3>Content versions</h3></div>{isStaff && <button className="subtle-link" type="button" onClick={() => onOpenModal("content", { id: productId, name: product.name })}>Add version <Icon name="plus" size={14} /></button>}</div>{versions.length ? <div className="content-version-list">{versions.map((version: PortalRow) => <article className="content-version" key={version.id}><div className="content-version-head"><b>{version.title}</b><span className="version-language">{version.language === "ar" ? "العربية" : "English"} · v{version.version}</span><Badge status={version.status} /></div>{version.shortDescription && <p>{version.shortDescription}</p>}{version.keywords?.length > 0 && <small>Keywords: {version.keywords.join(" · ")}</small>}</article>)}</div> : <Empty icon="file" title="No listing versions" description="English and Arabic marketplace copy will be versioned here." action={isStaff ? () => onOpenModal("content", { id: productId, name: product.name }) : undefined} actionLabel={isStaff ? "Create listing" : undefined} />}</section>
       </div><aside className="detail-column"><section className="detail-card"><span className="section-label">PRODUCTION FLOW</span><h3>Current workflow</h3><div className="workflow-track">{workflow.map((step: PortalRow) => <div className={`workflow-step ${step.status === "complete" || step.status === "completed" ? "complete" : step.status === "in_progress" ? "current" : ""}`} key={step.id}><span className="workflow-dot"><Icon name={step.status === "complete" || step.status === "completed" ? "check" : "circle"} size={12} /></span><span className="workflow-copy"><b>{step.stageLabel}</b>{step.comment && <span>{step.comment}</span>}</span>{step.completedAt && <time>{formatDate(step.completedAt, language, { day: "numeric", month: "short" })}</time>}</div>)}</div>{canChange && <label className="field-label status-control">Update workflow status<select value={product.status} onChange={(event) => void changeStatus(event.target.value)}>{workflowStatuses.map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select></label>}</section>
       <section className="detail-card"><span className="section-label">WORKSPACE</span><h3>Next steps</h3><p className="detail-help">{user.role === "client" ? "Your product history stays connected to the FLOW team. Approvals and new deliverables appear in your workspace." : "Keep internal notes private and make client-facing stage updates through the recorded workflow."}</p>{isStaff && <button type="button" className="button button-secondary button-small button-block" onClick={() => onOpenModal("upload", { productId, organizationId: product.organizationId })}><Icon name="upload" size={14} />Add a version</button>}</section></aside></div>
@@ -195,6 +196,7 @@ function ProductDetail({ productId, user, language, onBack, onOpenModal, onToast
 }
 
 function ProjectsView({ projects, products, user, language, onOpenModal, onToast, onRefresh }: { projects: PortalRow[]; products: PortalRow[]; user: AuthUserView; language: "en" | "ar"; onOpenModal: Props["onOpenModal"]; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [layout, setLayout] = useState("list");
   const [selected, setSelected] = useState<PortalRow | null>(null);
   if (selected) return <ProjectDetail project={selected} products={products.filter((product) => product.projectId === selected.id)} user={user} language={language} onBack={() => setSelected(null)} onToast={onToast} onRefresh={onRefresh} onOpenModal={onOpenModal} />;
@@ -203,10 +205,12 @@ function ProjectsView({ projects, products, user, language, onOpenModal, onToast
 }
 
 function ProjectCard({ project, productCount, language, onClick }: { project: PortalRow; productCount: number; language: "en" | "ar"; onClick: () => void }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   return <button type="button" className="project-card project-card-button" onClick={onClick}><div className="project-card-head"><span><span className="section-label">{project.projectCode}</span><h3>{project.name}</h3></span><Badge status={project.status} /></div><p>{project.description || "A FLOW project workspace."}</p><div className="project-card-meta"><span>Products<b>{productCount}</b></span><span>Deadline<b>{project.dueDate ? formatDate(project.dueDate, language) : t("Not set", "غير محدد")}</b></span><span>Priority<b>{titleCase(project.priority)}</b></span></div><span className="progress-line"><span style={{ width: `${Math.max(0, Math.min(100, Number(project.progress || 0)))}%` }} /></span><div className="project-card-footer"><span>{Number(project.progress || 0)}% complete</span><Icon name="arrow" size={15} /></div></button>;
 }
 
 function ProjectDetail({ project, products, user, language, onBack, onToast, onRefresh, onOpenModal }: { project: PortalRow; products: PortalRow[]; user: AuthUserView; language: "en" | "ar"; onBack: () => void; onToast: Props["onToast"]; onRefresh: Props["onRefresh"]; onOpenModal: Props["onOpenModal"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [status, setStatus] = useState(project.status);
   const [progress, setProgress] = useState(Number(project.progress || 0));
   const canManage = ["admin", "account_manager", "production_manager"].includes(user.role);
@@ -218,6 +222,7 @@ function ProjectDetail({ project, products, user, language, onBack, onToast, onR
 }
 
 function ProductionView({ products, user, language, onOpenModal, onToast, onRefresh, onNavigate }: { products: PortalRow[]; user: AuthUserView; language: "en" | "ar"; onOpenModal: Props["onOpenModal"]; onToast: Props["onToast"]; onRefresh: Props["onRefresh"]; onNavigate: Props["onNavigate"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const staff = user.role !== "client";
   const buckets = ["submitted", "photography_scheduled", "photography_in_progress", "image_editing", "content_creation", "internal_quality_review", "awaiting_client_approval", "revision_requested", "ready_for_publishing", "completed"];
   const filtered = products.filter((product) => buckets.includes(product.status));
@@ -229,16 +234,19 @@ function ProductionView({ products, user, language, onOpenModal, onToast, onRefr
 }
 
 function PhotographyView({ products, user, language, onOpenModal, onNavigate }: { products: PortalRow[]; user: AuthUserView; language: "en" | "ar"; onOpenModal: Props["onOpenModal"]; onNavigate: Props["onNavigate"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const photo = products.filter((product) => ["photography_scheduled", "photography_in_progress", "image_editing", "awaiting_client_approval", "revision_requested", "completed"].includes(product.status));
   return <><div className="photography-note"><span className="photography-note-mark"><Icon name="camera" size={18} /></span><span><b>Originals and approved edits remain versioned separately.</b><small>Use product details to compare file versions, download approved images or upload a new revision. FLOW does not overwrite a version a client has approved.</small></span></div><div className="toolbar"><span className="section-label">{photo.length} PHOTOGRAPHY ITEMS</span><button type="button" className="button button-secondary button-small" onClick={() => onNavigate("products")}><Icon name="products" size={14} />Browse product catalog</button></div>{photo.length ? <div className="product-card-grid">{photo.map((product) => <article className="product-card" key={product.id}><div className="photo-product-visual"><span className="product-placeholder-icon"><Icon name="camera" size={19} /></span><Badge status={product.status} /></div><div className="product-card-content"><h3>{product.name}</h3><p>{product.sku || t("SKU not set", "لم يتم تحديد SKU")} · {product.targetMarketplace || "Marketplace not selected"}</p><div className="product-card-footer"><span>{formatDate(product.updatedAt || product.createdAt, language)}</span><button type="button" className="subtle-link" onClick={() => onNavigate("products")}>Open product <Icon name="arrow" size={13} /></button></div></div></article>)}</div> : <div className="panel"><Empty icon="camera" title="No photography tasks yet" description="Products scheduled for photography and their image versions will appear here." action={() => onNavigate("products")} actionLabel="View products" /></div>}</>;
 }
 
 function ContentView({ products, user, language, onOpenModal, onToast, onRefresh }: { products: PortalRow[]; user: AuthUserView; language: "en" | "ar"; onOpenModal: Props["onOpenModal"]; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const contentProducts = products.filter((product) => ["content_creation", "internal_quality_review", "awaiting_client_approval", "revision_requested", "approved", "completed"].includes(product.status));
   return <><div className="content-language-banner"><span className="language-pair"><b>EN</b><i>+</i><b>ع</b></span><span><b>Arabic and English, versioned independently.</b><small>Each locale retains its own listing history, keywords and approval state.</small></span><Badge status="Bilingual" /></div>{contentProducts.length ? <div className="content-workspace-list">{contentProducts.map((product) => <ContentProduct key={product.id} product={product} user={user} language={language} onOpenModal={onOpenModal} onToast={onToast} onRefresh={onRefresh} />)}</div> : <div className="panel"><Empty icon="file" title="No listing work yet" description="Products with content creation or review in progress will appear here." /></div>}</>;
 }
 
 function ContentProduct({ product, user, language, onOpenModal, onToast, onRefresh }: { product: PortalRow; user: AuthUserView; language: "en" | "ar"; onOpenModal: Props["onOpenModal"]; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [versions, setVersions] = useState<PortalRow[]>([]);
   const [expanded, setExpanded] = useState(false);
   const canEdit = ["admin", "account_manager", "content_creator", "production_manager"].includes(user.role);
@@ -247,6 +255,7 @@ function ContentProduct({ product, user, language, onOpenModal, onToast, onRefre
 }
 
 function ApprovalsView({ approvals, user, language, onToast, onRefresh }: { approvals: PortalRow[]; user: AuthUserView; language: "en" | "ar"; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [revisionId, setRevisionId] = useState("");
   const [revisionNote, setRevisionNote] = useState("");
   const [busyId, setBusyId] = useState("");
@@ -265,11 +274,13 @@ function ApprovalsView({ approvals, user, language, onToast, onRefresh }: { appr
 }
 
 function ServicesView({ catalog, requests, user, language, onOpenModal, onToast, onRefresh }: { catalog: PortalRow[]; requests: PortalRow[]; user: AuthUserView; language: "en" | "ar"; onOpenModal: Props["onOpenModal"]; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const serviceIcon = (slug: string): IconName => slug.includes("photo") ? "camera" : slug.includes("listing") ? "file" : "marketplace";
   return <><div className="service-catalog-banner"><span className="service-catalog-banner-icon"><Icon name="spark" size={18} /></span><span><b>FLOW’s verified service catalog</b><small>Pricing shown is a public reference only. Your account manager confirms the final scope, terms and quote before work begins.</small></span></div><div className="section-header"><div><span className="section-label">WHAT WE DO</span><h2 className="section-title">Services for your marketplace flow</h2></div></div>{catalog.length ? <div className="service-catalog-grid">{catalog.map((service) => <article className="service-card" key={service.id}><div className="service-card-top"><span className="service-card-icon"><Icon name={serviceIcon(service.slug)} size={18} /></span><Badge status="Available" /></div><h3>{service.name}</h3><p>{service.description}</p>{service.price !== null && <div className="service-price">{formatMoney(service.price, service.currency || "EGP", language)}<small>{service.unitType === "per_item" ? "per item" : service.unitType === "monthly" ? "per month · starting reference" : service.unitType}</small></div>}<small className="reference-note">{service.priceLabel || "Quote confirmed by FLOW"}</small><button type="button" className="button button-secondary button-small" onClick={() => onOpenModal("service", { serviceId: service.id })}>Request this service <Icon name="arrow" size={14} /></button></article>)}</div> : <div className="panel"><Empty icon="services" title="Service catalog is not configured" description="Ask a FLOW administrator to enable the verified services offered by the agency." /></div>}<section className="panel panel-pad service-request-history"><div className="section-header"><div><span className="section-label">YOUR WORKSPACE</span><h2 className="section-title">Service requests</h2></div><span className="status-badge">{requests.length} total</span></div>{requests.length ? <div className="data-table-wrap"><table className="data-table"><thead><tr><th>Request</th><th>Products</th><th>Status</th><th>Deadline</th><th>Estimate</th></tr></thead><tbody>{requests.map((request) => <tr key={request.id}><td><span className="table-primary">{request.projectName}</span><span className="table-secondary">{request.targetMarketplace || "Marketplace not set"}</span></td><td>{request.productQuantity}</td><td><Badge status={request.status} /></td><td>{request.desiredDeadline ? formatDate(request.desiredDeadline, language) : t("Not set", "غير محدد")}</td><td>{request.estimatedCost === null ? "Awaiting FLOW quote" : formatMoney(request.estimatedCost, "EGP", language)}</td></tr>)}</tbody></table></div> : <Empty icon="services" title="No service requests yet" description="Your request history and FLOW’s confirmed estimates will be listed here." />}</section></>;
 }
 
 function MarketplaceView({ data, user, language }: { data: PortalRow; user: AuthUserView; language: "en" | "ar"; onOpenModal: Props["onOpenModal"]; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const marketplaces = data.marketplaces || [];
   const listings = data.listings || [];
   const statuses = ["not_published", "draft", "ready_for_publishing", "pending", "published", "rejected", "needs_attention"];
@@ -277,6 +288,7 @@ function MarketplaceView({ data, user, language }: { data: PortalRow; user: Auth
   return <><div className="marketplace-disclaimer"><Icon name="shield" size={15} /><span><b>Automated listing records.</b> FLOW tracks a separate record for every selected marketplace. Manual listing creation and status edits are disabled. Live publishing and status synchronization require each marketplace API to be authorized and tested.</span></div><div className="marketplace-grid">{marketplaces.map((marketplace: PortalRow) => <article className="marketplace-card" key={marketplace.id}><div className="marketplace-card-head"><b className={"marketplace-logo-text marketplace-" + marketplace.slug}>{marketplace.name}</b><Badge status={marketplace.connectionStatus || "not_connected"} /></div><p>{marketplace.connectionStatus === "connected" ? "Verified account connection." : "API connection is not configured yet."}</p><span className="marketplace-connection-note"><Icon name="link" size={13} />{marketplace.account?.displayName || "Awaiting secure account authorization"}</span></article>)}</div><section className="panel panel-pad marketplace-listings-panel"><div className="section-header"><div><span className="section-label">LISTING PIPELINE</span><h2 className="section-title">Marketplace tracking</h2></div><span className="status-badge">{listings.length} records</span></div>{counts.length > 0 && <div className="billing-summary">{counts.map((item) => <div className="billing-metric" key={item.status}><span>{titleCase(item.status)}</span><b>{item.count}</b></div>)}</div>}{listings.length ? <div className="data-table-wrap"><table className="data-table"><thead><tr><th>Product</th><th>Marketplace</th><th>Pipeline status</th><th>Listing ID</th><th>Last update</th><th>Product link</th></tr></thead><tbody>{listings.map((entry: PortalRow) => <tr key={entry.listing.id}><td>{entry.productName}</td><td>{entry.marketplaceName}</td><td><Badge status={entry.listing.status} />{entry.listing.errorMessage && <span className="table-secondary">{entry.listing.errorMessage}</span>}</td><td>{entry.listing.listingId || "—"}</td><td>{formatDate(entry.listing.updatedAt, language)}</td><td>{entry.listing.listingUrl ? <a href={entry.listing.listingUrl} target="_blank" rel="noreferrer" className="subtle-link">Open <Icon name="external" size={13} /></a> : "Awaiting API sync"}</td></tr>)}</tbody></table></div> : <Empty icon="marketplace" title="No marketplace tasks yet" description="Product tracking will appear here for each selected marketplace." />}<p className="module-footnote">Manual listing creation and status changes are disabled. Automatic publishing and live status updates require official API access for the client seller account; no account is shown as connected until verification succeeds.</p></section></>;
 }
 function BillingView({ invoices, payments, user, language, onOpenModal, onToast, onRefresh }: { invoices: PortalRow[]; payments: PortalRow[]; user: AuthUserView; language: "en" | "ar"; onOpenModal: Props["onOpenModal"]; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [selected, setSelected] = useState<PortalRow | null>(null);
   const outstanding = invoices.filter((invoice) => ["unpaid", "partially_paid", "pending"].includes(invoice.status)).reduce((sum, invoice) => sum + Math.max(0, Number(invoice.total) - Number(invoice.amountPaid)), 0);
   const paid = invoices.reduce((sum, invoice) => sum + Number(invoice.amountPaid || 0), 0);
@@ -286,10 +298,12 @@ function BillingView({ invoices, payments, user, language, onOpenModal, onToast,
 }
 
 function PaymentsView({ payments, language }: { payments: PortalRow[]; language: "en" | "ar" }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   return <div className="panel data-table-wrap">{payments.length ? <table className="data-table"><thead><tr><th>Invoice</th><th>Amount</th><th>Method</th><th>Reference</th><th>Verified</th><th>Status</th></tr></thead><tbody>{payments.map((payment) => <tr key={payment.id}><td>{payment.invoiceId}</td><td><b>{formatMoney(payment.amount, payment.currency, language)}</b></td><td>{titleCase(payment.method)}</td><td>{payment.reference || "—"}</td><td>{formatDate(payment.paidAt || payment.createdAt, language)}</td><td><Badge status={payment.status} /></td></tr>)}</tbody></table> : <Empty icon="billing" title="No payment records" description="Only payments verified by the FLOW team are recorded here." />}</div>;
 }
 
 function MessagesView({ conversations, user, language, onToast, onRefresh }: { conversations: PortalRow[]; user: AuthUserView; language: "en" | "ar"; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [conversationId, setConversationId] = useState("");
   const [thread, setThread] = useState<PortalRow | null>(null);
   const [body, setBody] = useState("");
@@ -357,6 +371,7 @@ function MessagesView({ conversations, user, language, onToast, onRefresh }: { c
 }
 
 function ReportsView({ data, language }: { data: PortalRow; language: "en" | "ar" }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const productBreakdown = data.products?.byStatus || [];
@@ -367,7 +382,7 @@ function ReportsView({ data, language }: { data: PortalRow; language: "en" | "ar
 }
 function shortStatus(value: string) { return value.replaceAll("_", " ").split(" ").map((word) => word.slice(0, 4)).join(" "); }
 
-function ClientsView({ clients, onToast, onRefresh }: { clients: PortalRow[]; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+function ClientsView({ clients, language, onToast, onRefresh }: { clients: PortalRow[]; language: "en" | "ar"; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {\n  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [filter, setFilter] = useState("all");
   const updateStatus = async (client: PortalRow, status: string) => {
     if (status === "active" && !window.confirm("Activate this client workspace and confirm email identity through FLOW’s manual review? This will be audit logged.")) return;
@@ -388,6 +403,7 @@ function TeamView({ team, onToast, onRefresh }: { team: PortalRow[]; onToast: Pr
 }
 
 function SubscriptionsView({ data, user, language, onOpenModal, onToast, onRefresh }: { data: PortalRow; user: AuthUserView; language: "en" | "ar"; onOpenModal: Props["onOpenModal"]; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const isAdmin = user.role === "admin";
   const [message, setMessage] = useState("");
   const subscription = data.subscription || null;
@@ -406,15 +422,18 @@ function SubscriptionsView({ data, user, language, onOpenModal, onToast, onRefre
 }
 
 function AuditView({ rows, language }: { rows: PortalRow[]; language: "en" | "ar" }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   return <div className="panel data-table-wrap">{rows.length ? <table className="data-table"><thead><tr><th>Action</th><th>Actor</th><th>Record</th><th>Timestamp</th><th>Value change</th></tr></thead><tbody>{rows.map((entry) => <tr key={entry.audit.id}><td><span className="table-primary">{entry.audit.action}</span></td><td>{entry.actorName || "System"}<span className="table-secondary">{entry.actorEmail || ""}</span></td><td>{entry.audit.entityType}{entry.audit.entityId ? <span className="table-secondary">{entry.audit.entityId}</span> : ""}</td><td>{formatDate(entry.audit.createdAt, language, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</td><td><span className="audit-value">{entry.audit.newValue ? JSON.stringify(entry.audit.newValue) : "—"}</span></td></tr>)}</tbody></table> : <Empty icon="shield" title="No audit entries" description="Important administrative actions will appear here. Audit entries cannot be edited from the portal." />}</div>;
 }
 
 function NotificationsView({ rows, language, onRefresh, onToast }: { rows: PortalRow[]; language: "en" | "ar"; onRefresh: Props["onRefresh"]; onToast: Props["onToast"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const markAll = async () => { try { await requestJson("/api/notifications", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ all: true }) }); onToast("Notifications marked as read."); onRefresh(); } catch (error) { onToast(error instanceof Error ? error.message : "Could not update notifications.", true); } };
   return <><div className="toolbar"><span className="section-label">{rows.filter((row) => !row.readAt).length} UNREAD</span><button type="button" className="button button-secondary button-small" onClick={() => void markAll()}>Mark all read <Icon name="check" size={14} /></button></div><div className="panel notification-list-panel">{rows.length ? rows.map((row) => <article className={`notification-row ${row.readAt ? "is-read" : ""}`} key={row.id}><span className="notification-row-icon"><Icon name={row.type === "message" ? "messages" : row.type === "invoice" ? "billing" : "spark"} size={15} /></span><span><b>{row.title}</b><small>{row.body}</small><time>{formatDate(row.createdAt, language, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</time></span><Badge status={row.readAt ? "read" : "unread"} /></article>) : <Empty icon="bell" title="No notifications yet" description="Important activity for this workspace will appear here." />}</div></>;
 }
 
 function SettingsView({ user, organization, language, onToast, onRefresh }: { user: AuthUserView; organization: OrganizationView | null; language: "en" | "ar"; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [busy, setBusy] = useState(false);
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault(); setBusy(true);
