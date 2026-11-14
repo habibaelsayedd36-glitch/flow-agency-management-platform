@@ -180,7 +180,7 @@ export function PortalApp() {
   if (!user) return <AuthScreen onAuthenticated={() => { void loadSession(); }} language={language} onLanguageChange={(next) => { setLanguage(next); window.localStorage.setItem("flow-language", next); }} />;
 
   if (user.status === "pending" || user.organizationStatus === "pending") {
-    return <main className="pending-screen" dir={language === "ar" ? "rtl" : "ltr"}><section className="pending-card">{logo()}<span className="eyebrow">CLIENT WORKSPACE REVIEW</span><h1>Welcome to FLOW, {user.fullName.split(" ")[0]}.</h1><p>Your account request has been received. A FLOW team member will review the workspace before production access is enabled.</p><div className="pending-status"><span className="status-badge pending">Awaiting review</span>{user.email && <span>{user.email}</span>}</div><p className="pending-note">If email verification is configured, check your inbox for a secure confirmation link. Until activation, workspace records remain unavailable.</p><div className="pending-actions"><button type="button" className="button button-secondary" onClick={() => void loadSession()}><Icon name="refresh" size={15} />Check status</button><button type="button" className="button button-primary" onClick={() => void logout()}><Icon name="logout" size={15} />Sign out</button></div></section></main>;
+    return <main className="pending-screen" dir={language === "ar" ? "rtl" : "ltr"}><section className="pending-card">{logo()}<span className="eyebrow">{text("CLIENT WORKSPACE REVIEW", "مراجعة مساحة عمل العميل")}</span><h1>{text("Welcome to FLOW,", "مرحبًا بك في FLOW،")} {user.fullName.split(" ")[0]}.</h1><p>{text("Your account request has been received. A FLOW team member will review the workspace before production access is enabled.", "تم استلام طلب حسابك. سيراجع فريق FLOW مساحة العمل قبل تفعيل الوصول إلى الإنتاج.")}</p><div className="pending-status"><span className="status-badge pending">{text("Awaiting review", "بانتظار المراجعة")}</span>{user.email && <span>{user.email}</span>}</div><p className="pending-note">{text("If email verification is configured, check your inbox for a secure confirmation link. Until activation, workspace records remain unavailable.", "إذا كان تأكيد البريد الإلكتروني مفعّلًا، تحقق من بريدك بحثًا عن رابط التأكيد. ستظل بيانات مساحة العمل غير متاحة حتى التفعيل.")}</p><div className="pending-actions"><button type="button" className="button button-secondary" onClick={() => void loadSession()}><Icon name="refresh" size={15} />{text("Check status", "التحقق من الحالة")}</button><button type="button" className="button button-primary" onClick={() => void logout()}><Icon name="logout" size={15} />{text("Sign out", "تسجيل الخروج")}</button></div></section></main>;
   }
 
   const viewMeta = views[activeView] || views.home;
@@ -189,15 +189,15 @@ export function PortalApp() {
   const isClient = user.role === "client";
   const roleScope = user.role;
   const actions: Record<string, { label: string; icon: IconName; modal: ModalName }[]> = {
-    home: isClient ? [{ label: "Add product", icon: "plus", modal: "product" }, { label: "Request a service", icon: "spark", modal: "service" }] : [{ label: "Add product", icon: "plus", modal: "product" }, { label: "Create project", icon: "plus", modal: "project" }],
-    products: [{ label: "Upload files", icon: "upload", modal: "upload" }, { label: "Add product", icon: "plus", modal: "product" }],
-    projects: [{ label: "New project", icon: "plus", modal: "project" }],
-    services: [{ label: "Request a service", icon: "plus", modal: "service" }],
-    clients: [{ label: "Add client", icon: "plus", modal: "client" }],
-    team: [{ label: "Add team member", icon: "plus", modal: "team" }],
-    billing: isAdmin ? [{ label: "Create invoice", icon: "plus", modal: "invoice" }] : [],
-    subscriptions: isAdmin ? [{ label: "Configure plan", icon: "plus", modal: "plan" }] : [],
-    photography: [{ label: "Upload photography", icon: "upload", modal: "upload" }],
+    home: isClient ? [{ label: text("Add product", "إضافة منتج"), icon: "plus", modal: "product" }, { label: text("Request a service", "طلب خدمة"), icon: "spark", modal: "service" }] : [{ label: text("Add product", "إضافة منتج"), icon: "plus", modal: "product" }, { label: text("Create project", "إنشاء مشروع"), icon: "plus", modal: "project" }],
+    products: [{ label: text("Upload files", "رفع ملفات"), icon: "upload", modal: "upload" }, { label: text("Add product", "إضافة منتج"), icon: "plus", modal: "product" }],
+    projects: [{ label: text("New project", "مشروع جديد"), icon: "plus", modal: "project" }],
+    services: [{ label: text("Request a service", "طلب خدمة"), icon: "plus", modal: "service" }],
+    clients: [{ label: text("Add client", "إضافة عميل"), icon: "plus", modal: "client" }],
+    team: [{ label: text("Add team member", "إضافة عضو للفريق"), icon: "plus", modal: "team" }],
+    billing: isAdmin ? [{ label: text("Create invoice", "إنشاء فاتورة"), icon: "plus", modal: "invoice" }] : [],
+    subscriptions: isAdmin ? [{ label: text("Configure plan", "إعداد الخطة"), icon: "plus", modal: "plan" }] : [],
+    photography: [{ label: text("Upload photography", "رفع الصور"), icon: "upload", modal: "upload" }],
   };
   const titleActions = actions[activeView] || [];
 
@@ -210,7 +210,7 @@ export function PortalApp() {
         <nav className="sidebar-nav" aria-label="Main navigation">
           {navItems.map((group) => <div className="nav-group" key={group.label}><p className="sidebar-section-label">{groupLabels[group.label] || group.label}</p>{group.items.map((item) => <button key={item.id} type="button" className={`nav-item ${activeView === item.id ? "active" : ""}`} onClick={() => { setActiveView(item.id); setMobileNavOpen(false); }}><Icon name={item.icon} size={16} /><span>{navLabels[item.id]?.[language] || views[item.id]?.title || item.id}</span>{item.id === "approvals" && dashboardData?.stats?.awaitingApproval ? <span className="nav-count">{dashboardData.stats.awaitingApproval}</span> : item.id === "messages" && unreadCount ? <span className="nav-count">{unreadCount}</span> : null}</button>)}</div>)}
         </nav>
-        <div className="sidebar-bottom"><div className="sidebar-help"><b>{text("Need support?", "محتاج مساعدة؟")}</b><p>{text("Talk to the FLOW team about your products or next steps.", "تواصل مع فريق FLOW بخصوص منتجاتك أو خطواتك القادمة.")}</p><button type="button" onClick={() => setActiveView("messages")}>{text("Message your team", "راسل فريقك")} <Icon name="arrow" size={12} /></button></div><div className="sidebar-user"><span className={`avatar ${!isClient ? "avatar-staff" : ""}`}>{initials(user.fullName)}</span><span className="sidebar-user-details"><b>{user.fullName}</b><span>{roleLabel(user.role)}</span></span><button className="sidebar-logout" type="button" aria-label="Sign out" onClick={() => void logout()}><Icon name="logout" size={16} /></button></div></div>
+        <div className="sidebar-bottom"><div className="sidebar-help"><b>{text("Need support?", "محتاج مساعدة؟")}</b><p>{text("Talk to the FLOW team about your products or next steps.", "تواصل مع فريق FLOW بخصوص منتجاتك أو خطواتك القادمة.")}</p><button type="button" onClick={() => setActiveView("messages")}>{text("Message your team", "راسل فريقك")} <Icon name="arrow" size={12} /></button></div><div className="sidebar-user"><span className={`avatar ${!isClient ? "avatar-staff" : ""}`}>{initials(user.fullName)}</span><span className="sidebar-user-details"><b>{user.fullName}</b><span>{roleLabel(user.role)}</span></span><button className="sidebar-logout" type="button" aria-label={text("Sign out", "تسجيل الخروج")} onClick={() => void logout()}><Icon name="logout" size={16} /></button></div></div>
       </aside>
 
       <div className="portal-main">
