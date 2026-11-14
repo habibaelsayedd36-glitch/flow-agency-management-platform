@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     if (!firstSheet) throw new ApiError(400, "The spreadsheet does not contain a worksheet.", "VALIDATION_ERROR");
     const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet, { defval: "", raw: false });
     if (!rows.length) throw new ApiError(400, "The spreadsheet has no product rows.", "VALIDATION_ERROR");
-    if (rows.length > 500) throw new ApiError(400, "Import up to 500 products at a time.", "VALIDATION_ERROR");
+    if (rows.length >= 500) throw new ApiError(400, "Import fewer than 500 products per spreadsheet (maximum 499).", "VALIDATION_ERROR");
     const productValues = rows.map((row) => ({
       organizationId,
       name: column(row, "name", "productname", "title"),
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       brand: column(row, "brand") || null,
       category: column(row, "category") || null,
       description: column(row, "description", "productdescription") || null,
-      targetMarketplace: column(row, "marketplace", "targetmarketplace") || null,
+      targetMarketplace: column(row, "marketplace", "marketplaces", "targetmarketplace", "targetmarketplaces").split(/[,;|]/).map((value) => value.trim()).filter(Boolean).join(", ") || null,
       createdBy: user.id,
     })).filter((row) => row.name);
     if (!productValues.length) throw new ApiError(400, "A product name column is required. Use a header named name or product name.", "VALIDATION_ERROR");
