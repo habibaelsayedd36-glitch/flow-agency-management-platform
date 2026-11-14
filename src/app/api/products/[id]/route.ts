@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { files, productContents, products, workflowSteps } from "@/db/schema";
+import { files, marketplaceListings, productContents, products, workflowSteps } from "@/db/schema";
 import { apiError, assertSameOrigin, optionalText, requireText } from "@/lib/api";
 import { assertProductAccess, canManageWork, requireActiveAccount, requireAuth } from "@/lib/authorization";
 import { writeActivity, writeAudit } from "@/lib/audit";
@@ -63,6 +63,9 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     }
     if (Object.keys(updates).length === 1) return NextResponse.json({ error: "No supported changes were provided." }, { status: 400 });
     const [updated] = await db.update(products).set(updates).where(eq(products.id, id)).returning();
+    if (updates.status === "ready_for_publishing") {
+      await db.update(marketplaceListings).set({ status: "ready_for_publishing", errorMessage: null, updatedAt: new Date() }).where(eq(marketplaceListings.productId, id));
+    }
     if (typeof updates.status === "string" && updates.status !== product.status) {
       const currentStage = FLOW_WORKFLOW.find((stage) => stage.key === updates.status);
       if (currentStage) {
