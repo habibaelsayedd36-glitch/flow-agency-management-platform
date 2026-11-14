@@ -49,7 +49,7 @@ export async function ensureFlowCatalog() {
     .values([
       { slug: "amazon", name: "Amazon" },
       { slug: "noon", name: "Noon" },
-      { slug: "tiktok-shop", name: "TikTok Shop" },
+      { slug: "jumia", name: "Jumia" },
       { slug: "shopify", name: "Shopify" },
       { slug: "instashop", name: "InstaShop" },
     ])
