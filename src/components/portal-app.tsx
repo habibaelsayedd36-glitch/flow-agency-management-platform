@@ -13,7 +13,7 @@ const navLabels: Record<string, { en: string; ar: string }> = {
   production: { en: "Production", ar: "الإنتاج" }, photography: { en: "Photography", ar: "التصوير" }, content: { en: "Content studio", ar: "استوديو المحتوى" },
   approvals: { en: "Approvals", ar: "الموافقات" }, services: { en: "Services", ar: "الخدمات" }, marketplace: { en: "Marketplaces", ar: "المنصات" },
   billing: { en: "Invoices", ar: "الفواتير" }, payments: { en: "Payments", ar: "المدفوعات" }, messages: { en: "Messages", ar: "الرسائل" }, reports: { en: "Reports", ar: "التقارير" },
-  settings: { en: "Workspace settings", ar: "إعدادات مساحة العمل" }, clients: { en: "Clients", ar: "العملاء" }, team: { en: "Team", ar: "الفريق" },
+  settings: { en: "Workspace settings", ar: "إعدادات مساحة العمل" }, clients: { en: "Clients", ar: "العملاء" }, deals: { en: "Deals & contracts", ar: "الاتفاقات والعقود" }, team: { en: "Team", ar: "الفريق" },
   subscriptions: { en: "Plans & subscriptions", ar: "الخطط والاشتراكات" }, audit: { en: "Audit log", ar: "سجل التدقيق" }, notifications: { en: "Notifications", ar: "الإشعارات" },
 };
 
@@ -33,6 +33,7 @@ const views: Record<string, { title: string; subtitle: string }> = {
   reports: { title: "Reports & analytics", subtitle: "Explore activity drawn from your actual FLOW workspace records." },
   settings: { title: "Workspace settings", subtitle: "Keep your company and onboarding information up to date." },
   clients: { title: "Client workspaces", subtitle: "Review onboarding, account assignments, and client history." },
+  deals: { title: "Deals & contracts", subtitle: "Keep the latest client agreement, commercial terms, and contract copies together." },
   team: { title: "Team management", subtitle: "Manage FLOW staff roles and active access." },
   subscriptions: { title: "Plans & subscriptions", subtitle: "Configure commercial terms and monitor real product usage." },
   audit: { title: "Audit log", subtitle: "A read-only history of important administrative actions." },
@@ -44,7 +45,7 @@ const navGroups: { label: string; items: { id: string; icon: IconName; roles?: s
   { label: "Production flow", items: [{ id: "production", icon: "production", roles: ["admin", "account_manager", "photographer", "content_creator", "production_manager"] }, { id: "photography", icon: "camera", roles: ["client", "admin", "account_manager", "photographer", "production_manager"] }, { id: "content", icon: "file", roles: ["client", "admin", "account_manager", "content_creator", "production_manager"] }, { id: "approvals", icon: "approvals" }] },
   { label: "Business", items: [{ id: "services", icon: "services" }, { id: "marketplace", icon: "marketplace" }, { id: "billing", icon: "billing", roles: ["client", "admin", "account_manager", "production_manager"] }, { id: "payments", icon: "receipt", roles: ["admin", "account_manager", "production_manager"] }] },
   { label: "Communication", items: [{ id: "messages", icon: "messages" }, { id: "reports", icon: "reports", roles: ["client", "admin", "account_manager", "production_manager"] }] },
-  { label: "FLOW team", items: [{ id: "clients", icon: "clients", roles: ["admin", "account_manager", "production_manager"] }, { id: "team", icon: "team", roles: ["admin"] }, { id: "subscriptions", icon: "billing", roles: ["admin", "client"] }, { id: "audit", icon: "shield", roles: ["admin"] }] },
+  { label: "FLOW team", items: [{ id: "clients", icon: "clients", roles: ["admin", "account_manager", "production_manager"] }, { id: "deals", icon: "file", roles: ["admin", "client"] }, { id: "team", icon: "team", roles: ["admin"] }, { id: "subscriptions", icon: "billing", roles: ["admin", "client"] }, { id: "audit", icon: "shield", roles: ["admin"] }] },
   { label: "Account", items: [{ id: "settings", icon: "settings" }] },
 ];
 

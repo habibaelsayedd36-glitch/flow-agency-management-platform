@@ -2,6 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { Icon, type IconName } from "@/components/flow-icons";
+import { DealsView } from "@/components/deals-view";
 import { type AuthUserView, type OrganizationView } from "@/components/auth-screen";
 import type { ModalName, PortalModal, ModalState } from "@/components/portal-modal";
 import { formatDate, formatMoney, requestJson, statusLabel, titleCase, type PortalRow } from "@/lib/portal-types";
@@ -70,6 +71,7 @@ export function PortalSections(props: Props) {
         else if (view === "messages") result = await requestJson("/api/messages");
         else if (view === "reports") result = await requestJson("/api/reports");
         else if (view === "clients") result = await requestJson("/api/clients");
+        else if (view === "deals") result = await requestJson("/api/deals");
         else if (view === "team") result = await requestJson("/api/team");
         else if (view === "subscriptions") {
           const [planResult, subscriptionResult] = await Promise.all([requestJson("/api/plans"), requestJson(`/api/subscriptions${user.role === "client" && user.organizationId ? `?organizationId=${user.organizationId}` : ""}`)]);
@@ -104,6 +106,7 @@ export function PortalSections(props: Props) {
   if (view === "messages") return <MessagesView conversations={data.conversations || []} user={user} language={language} onToast={onToast} onRefresh={onRefresh} />;
   if (view === "reports") return <ReportsView data={data} language={language} />;
   if (view === "clients") return <ClientsView clients={data.clients || []} onToast={onToast} onRefresh={onRefresh} />;
+  if (view === "deals") return <DealsView user={user} language={language} onToast={onToast} onRefresh={onRefresh} />;
   if (view === "team") return <TeamView team={data.team || []} onToast={onToast} onRefresh={onRefresh} />;
   if (view === "subscriptions") return <SubscriptionsView data={data} user={user} language={language} onOpenModal={onOpenModal} onToast={onToast} onRefresh={onRefresh} />;
   if (view === "audit") return <AuditView rows={data.auditLogs || []} language={language} />;

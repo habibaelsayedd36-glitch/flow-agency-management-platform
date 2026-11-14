@@ -25,11 +25,12 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       await assertOrganizationAccess(user, file.organizationId);
     }
     const safeName = encodeURIComponent(file.fileName).replace(/['()]/g, escape);
+    const isImage = ["image/jpeg", "image/png", "image/webp"].includes(file.contentType);
     return new Response(new Uint8Array(file.content), {
       headers: {
         "Content-Type": file.contentType,
         "Content-Length": String(file.fileSize),
-        "Content-Disposition": `attachment; filename*=UTF-8''${safeName}`,
+        "Content-Disposition": `${isImage ? "inline" : "attachment"}; filename*=UTF-8''${safeName}`,
         "X-Content-Type-Options": "nosniff",
         "Cache-Control": "private, no-store",
       },
