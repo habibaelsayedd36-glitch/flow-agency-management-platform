@@ -20,9 +20,9 @@ type Props = {
 
 const titles: Record<ModalName, { title: string; subtitle: string }> = {
   product: { title: "Add a product", subtitle: "Share the essentials. You can add references and details later." },
-  project: { title: t("Create a project", "إنشاء مشروع"), subtitle: "A simple starting point for the work you want FLOW to deliver." },
-  service: { title: t("Request a service", "طلب خدمة"), subtitle: "Tell us what you need. Your account manager will confirm scope and pricing." },
-  upload: { title: t("Upload a file", "رفع ملف"), subtitle: "Files are stored privately and linked to your workspace." },
+  project: { title: "Create a project", subtitle: "A simple starting point for the work you want FLOW to deliver." },
+  service: { title: "Request a service", subtitle: "Tell us what you need. Your account manager will confirm scope and pricing." },
+  upload: { title: "Upload a file", subtitle: "Files are stored privately and linked to your workspace." },
   client: { title: "Add a client workspace", subtitle: "New accounts are created in review until the client email is verified." },
   team: { title: "Add a team member", subtitle: "Set a scoped staff role. The role controls which records they can access." },
   invoice: { title: "Create an invoice", subtitle: "FLOW calculates line totals, discount, tax, and balance on the server." },
@@ -135,30 +135,30 @@ export function PortalModal({ modal, user, organization, language, onClose, onDo
   const currentTitle = modal.type === "content" && modal.payload?.name ? `${t("Create listing ·", "إنشاء قائمة ·")} ${modal.payload.name}` : t(title.title, arabicTitles[modal.type].title);
   return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) onClose(); }}>
     <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="portal-modal-title" dir={language === "ar" ? "rtl" : "ltr"}>
-      <header className="modal-head"><div><span className="eyebrow">FLOW CLIENT PORTAL</span><h2 id="portal-modal-title">{currentTitle}</h2><p>{t(title.subtitle, arabicTitles[modal.type].subtitle)}</p></div><button type="button" className="modal-close" onClick={onClose} aria-label=t("Close", "إغلاق")><Icon name="close" size={16} /></button></header>
+      <header className="modal-head"><div><span className="eyebrow">FLOW CLIENT PORTAL</span><h2 id="portal-modal-title">{currentTitle}</h2><p>{t(title.subtitle, arabicTitles[modal.type].subtitle)}</p></div><button type="button" className="modal-close" onClick={onClose} aria-label={t("Close", "إغلاق")}><Icon name="close" size={16} /></button></header>
       <form className="modal-body" onSubmit={submit}>
         {modal.type === "product" && <>
-          <TextField label=t("Product name", "اسم المنتج") name="name" required placeholder="e.g. Ceramic storage jar" />
-          <div className="form-grid-two"><TextField label=t("SKU", "رمز المنتج (SKU)") name="sku" placeholder="Optional internal code" /><TextField label=t("Brand", "العلامة التجارية") name="brand" placeholder="Brand name" /></div>
-          <div className="form-grid-two"><TextField label=t("Category", "الفئة") name="category" placeholder="Home & kitchen" /><TextField label=t("Product type", "نوع المنتج") name="productType" placeholder="e.g. Kitchen storage" /></div>
-          <div className="form-grid-two"><fieldset className="choice-field"><legend>Marketplaces · select all that apply</legend><div className="choice-row">{["Amazon", "Noon", "Jumia", "Shopify", "InstaShop", t("Other", "أخرى")].map((item) => <label key={item} className="choice-chip"><input type="checkbox" name="targetMarketplaces" value={item} />{item}</label>)}</div></fieldset><label className="field-label">Project (optional)<select name="projectId" defaultValue=""><option value="">No project linked</option>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label></div>
-          <label className="field-label">Product description<textarea name="description" rows={3} placeholder=t("What should our team know about this product?", "ما المعلومات التي يجب أن يعرفها فريقنا عن المنتج؟") /></label>
+          <TextField label={t("Product name", "اسم المنتج")} name="name" required placeholder="e.g. Ceramic storage jar" />
+          <div className="form-grid-two"><TextField label={t("SKU", "رمز المنتج (SKU)}") name="sku" placeholder="Optional internal code" /><TextField label={t("Brand", "العلامة التجارية")} name="brand" placeholder="Brand name" /></div>
+          <div className="form-grid-two"><TextField label={t("Category", "الفئة")} name="category" placeholder="Home & kitchen" /><TextField label={t("Product type", "نوع المنتج")} name="productType" placeholder="e.g. Kitchen storage" /></div>
+          <div className="form-grid-two"><fieldset className="choice-field"><legend>Marketplaces · select all that apply</legend><div className="choice-row">{["Amazon", "Noon", "Jumia", "Shopify", "InstaShop", "Other"].map((item) => <label key={item} className="choice-chip"><input type="checkbox" name="targetMarketplaces" value={item} />{item === "Other" ? t("Other", "أخرى") : item}</label>)}</div></fieldset><label className="field-label">Project (optional)<select name="projectId" defaultValue=""><option value="">No project linked</option>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label></div>
+          <label className="field-label">Product description<textarea name="description" rows={3} placeholder={t("What should our team know about this product?", "ما المعلومات التي يجب أن يعرفها فريقنا عن المنتج؟")} /></label>
           <fieldset className="choice-field"><legend>Services needed</legend><div className="choice-row">{[["product-photography", t("Photography", "التصوير")], ["bilingual-listing", t("Bilingual listing", "محتوى القائمة باللغتين")], ["marketplace-account-management", t("Account support", "دعم الحساب")]].map(([key, label]) => <button key={key} type="button" className={`choice-chip ${requiredServices.includes(key) ? "selected" : ""}`} onClick={() => setRequiredServices((current) => current.includes(key) ? current.filter((item) => item !== key) : [...current, key])}>{requiredServices.includes(key) && <Icon name="check" size={12} />}{label}</button>)}</div></fieldset>
-          <TextField label=t("Instructions for FLOW", "تعليمات لفريق FLOW") name="clientInstructions" rows={2} placeholder="Handling, styling or compliance notes…" />
+          <TextField label={t("Instructions for FLOW", "تعليمات لفريق FLOW")} name="clientInstructions" rows={2} placeholder="Handling, styling or compliance notes…" />
         </>}
 
         {modal.type === "project" && <>
-          <TextField label=t("Project name", "اسم المشروع") name="name" required placeholder="e.g. Summer product launch" />
-          <TextField label=t("Project brief", "ملخص المشروع") name="description" rows={4} placeholder="What does success look like for this project?" />
-          <div className="form-grid-two"><TextField label=t("Target delivery date", "موعد التسليم المستهدف") name="dueDate" type="date" /><label className="field-label">Priority<select name="priority" defaultValue="normal"><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></label></div>
+          <TextField label={t("Project name", "اسم المشروع")} name="name" required placeholder="e.g. Summer product launch" />
+          <TextField label={t("Project brief", "ملخص المشروع")} name="description" rows={4} placeholder="What does success look like for this project?" />
+          <div className="form-grid-two"><TextField label={t("Target delivery date", "موعد التسليم المستهدف")} name="dueDate" type="date" /><label className="field-label">Priority<select name="priority" defaultValue="normal"><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></label></div>
         </>}
 
         {modal.type === "service" && <>
           <label className="field-label">Service type<select name="serviceId" required defaultValue=""><option value="">Choose a FLOW service</option>{services.map((service) => <option key={service.id} value={service.id}>{service.name}{service.price !== null ? ` · ${new Intl.NumberFormat("en-EG", { style: "currency", currency: service.currency || "EGP", maximumFractionDigits: 0 }).format(Number(service.price))} ${service.unitType === "per_item" ? "per item" : service.unitType === "monthly" ? "monthly" : ""}` : ""}</option>)}</select></label>
-          <TextField label=t("Request or project name", "اسم الطلب أو المشروع") name="projectName" required placeholder="What should we call this request?" />
+          <TextField label={t("Request or project name", "اسم الطلب أو المشروع")} name="projectName" required placeholder="What should we call this request?" />
           <div className="form-grid-two"><label className="field-label">Product quantity<input name="productQuantity" type="number" min="1" max="100000" value={productQuantity} onChange={(event) => setProductQuantity(Number(event.target.value))} required /></label><label className="field-label">Target marketplace<select name="targetMarketplace" defaultValue=""><option value="">Not specified</option><option>Amazon</option><option>Noon</option><option>Jumia</option><option>Shopify</option><option>InstaShop</option><option>Other</option></select></label></div>
-          <TextField label=t("Desired deadline", "الموعد النهائي المطلوب") name="desiredDeadline" type="date" />
-          <TextField label=t("Brief and requirements", "ملخص ومتطلبات الطلب") name="description" rows={4} placeholder="Include any details or references that will help us scope the request." />
+          <TextField label={t("Desired deadline", "الموعد النهائي المطلوب")} name="desiredDeadline" type="date" />
+          <TextField label={t("Brief and requirements", "ملخص ومتطلبات الطلب")} name="description" rows={4} placeholder="Include any details or references that will help us scope the request." />
           <div className="form-alert success-alert">Public price references are indicative only. FLOW will confirm your quote and delivery date before work begins.</div>
         </>}
 
@@ -166,27 +166,27 @@ export function PortalModal({ modal, user, organization, language, onClose, onDo
           <label className="field-label file-drop-field"><span>Choose file · JPG, PNG, WebP, PDF, CSV, XLSX, MP4 · up to 10 MB</span><input name="file" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.csv,.xls,.xlsx,.mp4" required /><small>Each upload is stored as a new version; approved files are never overwritten.</small></label>
           <div className="form-grid-two"><label className="field-label">File category<select name="category" defaultValue="document"><option value="reference">Reference</option><option value="original">Original product image</option><option value="edited">Edited image</option><option value="deliverable">Deliverable</option><option value="document">Document</option><option value="other">Other</option></select></label><label className="field-label">Link to product (optional)<select name="productId" defaultValue={String(modal.payload?.productId || "")}><option value="">No product linked</option>{productOptions.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}</select></label></div>
           <label className="field-label">Link to project (optional)<select name="projectId" defaultValue={String(modal.payload?.projectId || "")}><option value="">No project linked</option>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>
-          {isStaff && <TextField label=t("Client workspace ID", "معرّف مساحة عمل العميل") name="organizationId" defaultValue={String(modal.payload?.organizationId || currentOrganizationId)} placeholder="Workspace ID" />}
+          {isStaff && <TextField label={t("Client workspace ID", "معرّف مساحة عمل العميل")} name="organizationId" defaultValue={String(modal.payload?.organizationId || currentOrganizationId)} placeholder="Workspace ID" />}
           {isStaff && <label className="switch-row"><span><b>Visible to client</b><small>Turn off to keep the upload internal to FLOW.</small></span><input type="checkbox" checked={clientVisible} onChange={(event) => setClientVisible(event.target.checked)} /></label>}
           <p className="form-hint"><Icon name="shield" size={14} />Files are delivered through a private, permission-checked download route.</p>
         </>}
 
         {modal.type === "client" && <>
-          <TextField label=t("Company name", "اسم الشركة") name="companyName" required placeholder="Client company" />
-          <div className="form-grid-two"><TextField label=t("Contact person", "الشخص المسؤول") name="fullName" required placeholder=t("Full name", "الاسم بالكامل") /><TextField label=t("Phone", "رقم الهاتف") name="phone" placeholder="+20 …" /></div>
-          <div className="form-grid-two"><TextField label=t("Email", "البريد الإلكتروني") name="email" type="email" required placeholder="client@company.com" /><TextField label=t("Business category", "مجال النشاط") name="category" placeholder=t("Category", "الفئة") /></div>
-          <TextField label=t("Website (optional)", "الموقع الإلكتروني (اختياري)") name="website" type="url" placeholder="https://www.company.com" /><div className="form-grid-two"><TextField label=t("Temporary password", "كلمة مرور مؤقتة") name="password" type="password" required placeholder="At least 12 characters" /><label className="field-label">Preferred language<select name="preferredLanguage" defaultValue="en"><option value="en">English</option><option value="ar">Arabic</option></select></label></div>
+          <TextField label={t("Company name", "اسم الشركة")} name="companyName" required placeholder="Client company" />
+          <div className="form-grid-two"><TextField label={t("Contact person", "الشخص المسؤول")} name="fullName" required placeholder={t("Full name", "الاسم بالكامل")} /><TextField label={t("Phone", "رقم الهاتف")} name="phone" placeholder="+20 …" /></div>
+          <div className="form-grid-two"><TextField label={t("Email", "البريد الإلكتروني")} name="email" type="email" required placeholder="client@company.com" /><TextField label={t("Business category", "مجال النشاط")} name="category" placeholder={t("Category", "الفئة")} /></div>
+          <TextField label={t("Website (optional)}", "الموقع الإلكتروني (اختياري)") name="website" type="url" placeholder="https://www.company.com" /><div className="form-grid-two"><TextField label={t("Temporary password", "كلمة مرور مؤقتة")} name="password" type="password" required placeholder="At least 12 characters" /><label className="field-label">Preferred language<select name="preferredLanguage" defaultValue="en"><option value="en">English</option><option value="ar">Arabic</option></select></label></div>
         </>}
 
         {modal.type === "team" && <>
-          <TextField label=t("Full name", "الاسم بالكامل") name="fullName" required placeholder="Team member name" />
-          <div className="form-grid-two"><TextField label=t("Work email", "بريد العمل") name="email" type="email" required placeholder="name@flow-agency-eg.com" /><TextField label=t("Temporary password", "كلمة مرور مؤقتة") name="password" type="password" required placeholder="At least 12 characters" /></div>
-          <div className="form-grid-two"><label className="field-label">Role<select name="role" required defaultValue="account_manager"><option value="account_manager">Account manager</option><option value="photographer">Photography team</option><option value="content_creator">Content team</option><option value="production_manager">Production manager</option></select></label><TextField label=t("Department", "القسم") name="department" placeholder="Production" /></div>
-          <div className="form-grid-two"><TextField label=t("Job title", "المسمى الوظيفي") name="title" placeholder="Role title" /><TextField label=t("Phone", "رقم الهاتف") name="phone" placeholder="Optional" /></div>
+          <TextField label={t("Full name", "الاسم بالكامل")} name="fullName" required placeholder="Team member name" />
+          <div className="form-grid-two"><TextField label={t("Work email", "بريد العمل")} name="email" type="email" required placeholder="name@flow-agency-eg.com" /><TextField label={t("Temporary password", "كلمة مرور مؤقتة")} name="password" type="password" required placeholder="At least 12 characters" /></div>
+          <div className="form-grid-two"><label className="field-label">Role<select name="role" required defaultValue="account_manager"><option value="account_manager">Account manager</option><option value="photographer">Photography team</option><option value="content_creator">Content team</option><option value="production_manager">Production manager</option></select></label><TextField label={t("Department", "القسم")} name="department" placeholder="Production" /></div>
+          <div className="form-grid-two"><TextField label={t("Job title", "المسمى الوظيفي")} name="title" placeholder="Role title" /><TextField label={t("Phone", "رقم الهاتف")} name="phone" placeholder="Optional" /></div>
         </>}
 
         {modal.type === "invoice" && <>
-          <TextField label=t("Client workspace ID", "معرّف مساحة عمل العميل") name="organizationId" required placeholder="Client organization ID" />
+          <TextField label={t("Client workspace ID", "معرّف مساحة عمل العميل")} name="organizationId" required placeholder="Client organization ID" />
           <TextField label="Invoice line description" name="itemDescription" required placeholder="e.g. Product photography · 20 items" />
           <div className="form-grid-two"><TextField label="Quantity" name="quantity" required type="number" min={0.01} step={0.01} defaultValue={1} /><TextField label="Unit price (EGP)" name="unitPrice" required type="number" min={0} step={0.01} /></div>
           <div className="form-grid-two"><TextField label="Discount (EGP)" name="discount" type="number" min={0} step={0.01} defaultValue={0} /><TextField label="Tax rate (%)" name="taxRate" type="number" min={0} max={30} step={0.01} defaultValue={0} /></div>
