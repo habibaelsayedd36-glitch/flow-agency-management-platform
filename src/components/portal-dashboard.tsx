@@ -73,7 +73,7 @@ export function PortalDashboard({ data, user, organization, language, onNavigate
               <span className="progress-cell"><span className="table-cell-label">Progress</span><span className="progress-line"><span style={{ width: `${Math.max(0, Math.min(100, Number(project.progress || 0)))}%` }} /></span><small>{Number(project.progress || 0)}% complete</small></span>
               <Icon name="chevron" size={16} className="project-chevron" />
             </button>)}
-          </div> : <EmptyState icon="projects" title=t("Your first project starts here", "مشروعك الأول يبدأ من هنا") detail=t("Create a project or submit products and the FLOW team will help shape the next steps.", "أنشئ مشروعًا أو أضف منتجاتك وسيساعدك فريق FLOW في تحديد الخطوات التالية.") action={() => onAction("project")} button=t("Create a project", "إنشاء مشروع") />}
+          </div> : <EmptyState icon="projects" title={t("Your first project starts here", "مشروعك الأول يبدأ من هنا")} detail={t("Create a project or submit products and the FLOW team will help shape the next steps.", "أنشئ مشروعًا أو أضف منتجاتك وسيساعدك فريق FLOW في تحديد الخطوات التالية.")} action={() => onAction("project")} button={t("Create a project", "إنشاء مشروع")} />}
         </section>
 
         <div className="dashboard-side-stack">
@@ -92,7 +92,7 @@ export function PortalDashboard({ data, user, organization, language, onNavigate
 
       <section className="panel panel-pad activity-panel">
         <div className="section-header"><div><span className="section-label">FROM YOUR WORKSPACE</span><h2 className="section-title">Recent activity</h2></div><button type="button" className="subtle-link" onClick={() => onNavigate("notifications")}>All updates <Icon name="arrow" size={14} /></button></div>
-        {activity.length ? <div className="activity-list">{activity.slice(0, 6).map((item) => <div className="activity-item" key={item.id}><span className="activity-icon"><Icon name={activityIcon(item.entityType)} size={13} /></span><div className="activity-copy"><b>{item.description}</b><span>{formatDate(item.createdAt, language, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span></div></div>)}</div> : <EmptyState icon="clock" title=t("Your activity will appear here", "سيظهر نشاطك هنا") detail=t("Product submissions, updates, approvals and messages will be collected in one place.", "ستظهر هنا طلبات المنتجات والتحديثات والموافقات والرسائل في مكان واحد.") />}
+        {activity.length ? <div className="activity-list">{activity.slice(0, 6).map((item) => <div className="activity-item" key={item.id}><span className="activity-icon"><Icon name={activityIcon(item.entityType)} size={13} /></span><div className="activity-copy"><b>{item.description}</b><span>{formatDate(item.createdAt, language, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span></div></div>)}</div> : <EmptyState icon="clock" title={t("Your activity will appear here", "سيظهر نشاطك هنا")} detail={t("Product submissions, updates, approvals and messages will be collected in one place.", "ستظهر هنا طلبات المنتجات والتحديثات والموافقات والرسائل في مكان واحد.")} />}
       </section>
     </div>
   );
