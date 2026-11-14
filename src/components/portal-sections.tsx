@@ -120,6 +120,16 @@ function ProductsView({ products, user, language, onOpenModal, onToast, onRefres
   const [selectedId, setSelectedId] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [importing, setImporting] = useState(false);
+  const [selectedWorkspace, setSelectedWorkspace] = useState(user.organizationId || "");
+  const [workspaces, setWorkspaces] = useState<PortalRow[]>([]);
+  useEffect(() => {
+    if (user.role !== "admin") return;
+    let active = true;
+    requestJson<{ clients: PortalRow[] }>("/api/clients")
+      .then((result) => { if (active) setWorkspaces(result.clients || []); })
+      .catch((error) => { if (active) onToast(error instanceof Error ? error.message : "Could not load workspaces.", true); });
+    return () => { active = false; };
+  }, [user.role, onToast]);
   const filtered = products.filter((product) => `${product.name} ${product.sku || ""} ${product.category || ""}`.toLowerCase().includes(query.toLowerCase()) && (status === "all" || product.status === status));
 
   const importFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -127,7 +137,14 @@ function ProductsView({ products, user, language, onOpenModal, onToast, onRefres
     if (!file) return;
     setImporting(true);
     const form = new FormData(); form.set("file", file);
-    if (user.role !== "client" && user.organizationId) form.set("organizationId", user.organizationId);
+    const workspaceId = user.role === "client" ? user.organizationId : (user.organizationId || selectedWorkspace);
+    if (workspaceId) form.set("organizationId", workspaceId);
+    if (!workspaceId) {
+      onToast("Select the client workspace before importing the spreadsheet.", true);
+      setImporting(false);
+      event.target.value = "";
+      return;
+    }
     try {
       const response = await fetch("/api/products/import", { method: "POST", body: form, cache: "no-store" });
       const result = await response.json();
@@ -140,7 +157,7 @@ function ProductsView({ products, user, language, onOpenModal, onToast, onRefres
 
   if (selectedId) return <ProductDetail productId={selectedId} user={user} language={language} onBack={() => setSelectedId("")} onOpenModal={onOpenModal} onToast={onToast} onRefresh={onRefresh} />;
   return <>
-    <div className="toolbar"><div className="toolbar-left"><label className="search-box"><Icon name="search" size={15} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, SKU or category" aria-label="Search products" /></label><select className="toolbar-select" value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filter products"><option value="all">All statuses</option>{workflowStatuses.map((item) => <option key={item} value={item}>{titleCase(item)}</option>)}</select></div><div className="toolbar-right"><label className="button button-secondary button-small import-label">{importing ? "Importing…" : "Import CSV / Excel"}<Icon name="upload" size={14} /><input type="file" accept=".csv,.xlsx,.xls" onChange={importFile} disabled={importing} /></label><button type="button" className="icon-button" aria-label="Table view" onClick={() => setViewMode("table")}><Icon name="projects" size={15} /></button><button type="button" className="icon-button" aria-label="Card view" onClick={() => setViewMode("cards")}><Icon name="grid" size={15} /></button></div></div>
+    <div className="toolbar"><div className="toolbar-left">{user.role === "admin" && <select className="toolbar-select" value={selectedWorkspace} onChange={(event) => setSelectedWorkspace(event.target.value)} aria-label="Select client workspace"><option value="">Select client workspace</option>{workspaces.map((entry) => <option key={entry.organization.id} value={entry.organization.id}>{entry.organization.companyName}</option>)}</select>}<label className="search-box"><Icon name="search" size={15} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, SKU or category" aria-label="Search products" /></label><select className="toolbar-select" value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filter products"><option value="all">All statuses</option>{workflowStatuses.map((item) => <option key={item} value={item}>{titleCase(item)}</option>)}</select></div><div className="toolbar-right"><label className="button button-secondary button-small import-label">{importing ? "Importing…" : "Import CSV / Excel"}<Icon name="upload" size={14} /><input type="file" accept=".csv,.xlsx,.xls" onChange={importFile} disabled={importing} /></label><button type="button" className="icon-button" aria-label="Table view" onClick={() => setViewMode("table")}><Icon name="projects" size={15} /></button><button type="button" className="icon-button" aria-label="Card view" onClick={() => setViewMode("cards")}><Icon name="grid" size={15} /></button></div></div>
     {filtered.length === 0 ? <div className="panel"><Empty icon="products" title={products.length ? "No matching products" : "Your product catalog is ready"} description={products.length ? "Try a different search or status filter." : "Import a spreadsheet with up to 499 products to start your production workflow."}  /></div> : viewMode === "cards" ? <div className="product-card-grid">{filtered.map((product) => <button className="product-card product-card-button" type="button" key={product.id} onClick={() => setSelectedId(product.id)}><div className="product-card-top"><span className="product-placeholder-icon"><Icon name="products" size={19} /></span><span className="product-card-status"><Badge status={product.status} /></span></div><div className="product-card-content"><h3>{product.name}</h3><p>{[product.brand, product.category].filter(Boolean).join(" · ") || product.sku || "Product details"}</p><div className="product-card-footer"><span>{product.sku || "SKU not set"}</span><span>{formatDate(product.createdAt, language, { day: "numeric", month: "short" })}</span></div></div></button>)}</div> : <div className="panel data-table-wrap"><table className="data-table"><thead><tr><th>Product</th><th>SKU</th><th>Marketplace</th><th>Status</th><th>Submitted</th><th /></tr></thead><tbody>{filtered.map((product) => <tr key={product.id}><td><button type="button" className="table-primary table-button" onClick={() => setSelectedId(product.id)}>{product.name}</button><span className="table-secondary">{product.brand || product.category || ""}</span></td><td>{product.sku || "—"}</td><td>{product.targetMarketplace || "—"}</td><td><Badge status={product.status} /></td><td>{formatDate(product.createdAt, language)}</td><td><button type="button" className="icon-button" aria-label={`Open ${product.name}`} onClick={() => setSelectedId(product.id)}><Icon name="arrow" size={15} /></button></td></tr>)}</tbody></table></div>}
     <p className="record-count">Showing {filtered.length} of {products.length} products · data from your workspace</p>
   </>;
