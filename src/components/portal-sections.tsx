@@ -382,7 +382,8 @@ function ReportsView({ data, language }: { data: PortalRow; language: "en" | "ar
 }
 function shortStatus(value: string) { return value.replaceAll("_", " ").split(" ").map((word) => word.slice(0, 4)).join(" "); }
 
-function ClientsView({ clients, language, onToast, onRefresh }: { clients: PortalRow[]; language: "en" | "ar"; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {\n  const t = (en: string, ar: string) => language === "ar" ? ar : en;
+function ClientsView({ clients, language, onToast, onRefresh }: { clients: PortalRow[]; language: "en" | "ar"; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
+  const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [filter, setFilter] = useState("all");
   const updateStatus = async (client: PortalRow, status: string) => {
     if (status === "active" && !window.confirm("Activate this client workspace and confirm email identity through FLOW’s manual review? This will be audit logged.")) return;
