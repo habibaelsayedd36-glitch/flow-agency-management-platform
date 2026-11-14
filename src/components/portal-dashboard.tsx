@@ -15,17 +15,17 @@ type Props = {
 };
 
 const statDefinitions: { key: keyof NonNullable<PortalDashboardData["stats"]>; label: string; foot: string; icon: IconName }[] = [
-  { key: t("products", "منتجات"), label: t("Products submitted", "المنتجات المقدمة"), foot: t("Across your workspace", "في مساحة عملك"), icon: t("products", "منتجات") },
-  { key: "inProduction", label: t("In production", "قيد التنفيذ"), foot: t("Currently moving through FLOW", "تتم معالجتها حاليًا عبر FLOW"), icon: "production" },
-  { key: "awaitingApproval", label: t("Awaiting approval", "بانتظار الموافقة"), foot: t("Your review keeps work moving", "مراجعتك تساعد على استمرار العمل"), icon: "approvals" },
-  { key: "activeProjects", label: t("Active projects", "المشروعات النشطة"), foot: t("Projects with work in progress", "مشروعات قيد التنفيذ"), icon: "projects" },
+  { key: "products", label: "Products submitted", foot: "Across your workspace", icon: "products" },
+  { key: "inProduction", label: "In production", foot: "Currently moving through FLOW", icon: "production" },
+  { key: "awaitingApproval", label: "Awaiting approval", foot: "Your review keeps work moving", icon: "approvals" },
+  { key: "activeProjects", label: "Active projects", foot: "Projects with work in progress", icon: "projects" },
 ];
 
 const quickActions: { title: string; icon: IconName; action: DashboardAction }[] = [
-  { title: t("Add a product", "إضافة منتج"), icon: "plus", action: "product" },
-  { title: t("Create a project", "إنشاء مشروع"), icon: "projects", action: "project" },
-  { title: t("Request a service", "طلب خدمة"), icon: "spark", action: "service" },
-  { title: t("Upload files", "رفع ملفات"), icon: "upload", action: "upload" },
+  { title: "Add a product", icon: "plus", action: "product" },
+  { title: "Create a project", icon: "projects", action: "project" },
+  { title: "Request a service", icon: "spark", action: "service" },
+  { title: "Upload files", icon: "upload", action: "upload" },
 ];
 
 function StatusBadge({ status }: { status: unknown }) {
@@ -40,6 +40,7 @@ function EmptyState({ icon, title, detail, action, button }: { icon: IconName; t
 export function PortalDashboard({ data, user, organization, language, onNavigate, onAction }: Props) {
   const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const stats = data.stats;
+  const arText: Record<string, string> = { "Products submitted": "المنتجات المقدمة", "Across your workspace": "في مساحة عملك", "In production": "قيد التنفيذ", "Currently moving through FLOW": "تتم معالجتها حاليًا عبر FLOW", "Awaiting approval": "بانتظار الموافقة", "Your review keeps work moving": "مراجعتك تساعد على استمرار العمل", "Active projects": "المشروعات النشطة", "Projects with work in progress": "مشروعات قيد التنفيذ", "Add a product": "إضافة منتج", "Create a project": "إنشاء مشروع", "Request a service": "طلب خدمة", "Upload files": "رفع ملفات" };
   const projects = data.projects || [];
   const activity = data.activity || [];
   const displayName = String(user.fullName || organization?.contactPerson || "there").split(" ")[0];
@@ -58,7 +59,7 @@ export function PortalDashboard({ data, user, organization, language, onNavigate
       </section>
 
       <section className="stats-grid" aria-label=t("Workspace statistics", "إحصائيات مساحة العمل")>
-        {statDefinitions.map((stat) => <article className="stat-card" key={stat.key}><div className="stat-top"><span>{stat.label}</span><span className="stat-icon"><Icon name={stat.icon} size={16} /></span></div><strong>{stats?.[stat.key] ?? 0}</strong><small>{stat.foot}</small></article>)}
+        {statDefinitions.map((stat) => <article className="stat-card" key={stat.key}><div className="stat-top"><span>{t(stat.label, arText[stat.label] || stat.label)}</span><span className="stat-icon"><Icon name={stat.icon} size={16} /></span></div><strong>{stats?.[stat.key] ?? 0}</strong><small>{t(stat.foot, arText[stat.foot] || stat.foot)}</small></article>)}
       </section>
 
       <div className="section-header"><div><span className="section-label">WORK IN MOTION</span><h2 className="section-title">Your projects</h2></div><button className="subtle-link" type="button" onClick={() => onNavigate("projects")}>View all projects <Icon name="arrow" size={14} /></button></div>
@@ -87,7 +88,7 @@ export function PortalDashboard({ data, user, organization, language, onNavigate
         </div>
       </div>
 
-      <section className="quick-actions" aria-label=t("Quick actions", "إجراءات سريعة")>{quickActions.map((item) => <button className="quick-action" type="button" key={item.action} onClick={() => onAction(item.action)}><span className="quick-action-icon"><Icon name={item.icon} size={16} /></span><span>{item.title}</span></button>)}</section>
+      <section className="quick-actions" aria-label=t("Quick actions", "إجراءات سريعة")>{quickActions.map((item) => <button className="quick-action" type="button" key={item.action} onClick={() => onAction(item.action)}><span className="quick-action-icon"><Icon name={item.icon} size={16} /></span><span>{t(item.title, arText[item.title] || item.title)}</span></button>)}</section>
 
       <section className="panel panel-pad activity-panel">
         <div className="section-header"><div><span className="section-label">FROM YOUR WORKSPACE</span><h2 className="section-title">Recent activity</h2></div><button type="button" className="subtle-link" onClick={() => onNavigate("notifications")}>All updates <Icon name="arrow" size={14} /></button></div>
