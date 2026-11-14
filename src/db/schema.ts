@@ -661,3 +661,31 @@ export const auditLogs = pgTable(
   },
   (table) => [index("flow_audit_actor_time_idx").on(table.actorId, table.createdAt), index("flow_audit_entity_idx").on(table.entityType, table.entityId)],
 );
+
+
+export const clientDeals = pgTable(
+  "flow_client_deals",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    organizationId: uuid("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    title: varchar("title", { length: 180 }).notNull(),
+    summary: text("summary").notNull(),
+    services: text("services").array().notNull().default(sql`ARRAY[]::text[]`),
+    dealValue: numeric("deal_value", { precision: 12, scale: 2, mode: "number" }),
+    currency: varchar("currency", { length: 3 }).notNull().default("EGP"),
+    status: varchar("status", { length: 24 }).notNull().default("agreed"),
+    agreementDate: date("agreement_date"),
+    contractFileId: uuid("contract_file_id").references(() => files.id, { onDelete: "set null" }),
+    contractStatus: varchar("contract_status", { length: 24 }).notNull().default("not_uploaded"),
+    contractStartDate: date("contract_start_date"),
+    contractEndDate: date("contract_end_date"),
+    clientVisible: boolean("client_visible").notNull().default(false),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    index("flow_client_deals_org_date_idx").on(table.organizationId, table.agreementDate),
+    index("flow_client_deals_status_idx").on(table.status),
+  ],
+);
