@@ -682,7 +682,7 @@ body { font-size: 16px; }
 }
 .theme-toggle > span:first-child { font-size: 17px; line-height: 1; }
 .theme-toggle:hover { border-color: var(--flow-green); }
-html[dir="rtl"] body, .portal-shell[dir="rtl] { font-family: var(--font-arabic), sans-serif; }
+html[dir="rtl"] body, html[dir="rtl"] .portal-shell { font-family: var(--font-arabic), sans-serif; }
 html[dir="rtl"] button, html[dir="rtl"] input, html[dir="rtl"] select, html[dir="rtl"] textarea { font-family: var(--font-arabic), sans-serif; }
 html[dir="rtl"] .portal-shell { text-align: right; }
 html[dir="rtl"] .nav-item { text-align: right; }
@@ -716,8 +716,8 @@ html[dir="rtl"] .table-button { text-align: right; }
   --flow-shadow: 0 18px 48px rgba(0, 0, 0, .32);
   --flow-shadow-small: 0 4px 14px rgba(0, 0, 0, .24);
 }
-:root[data-theme="dark"] html,
-:root[data-theme="dark"] body,
+html[data-theme="dark"],
+html[data-theme="dark"] body,
 :root[data-theme="dark"] .portal-shell { color: var(--flow-text); background: var(--flow-canvas); }
 :root[data-theme="dark"] .portal-sidebar { background: #0b120e; color: #edf5ec; }
 :root[data-theme="dark"] .portal-topbar,
