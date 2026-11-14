@@ -1,7 +1,7 @@
 import * as XLSX from "xlsx";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { products, workflowSteps } from "@/db/schema";
+import { marketplaceListings, marketplaces, products, workflowSteps } from "@/db/schema";
 import { ApiError, apiError, assertSameOrigin, requireText } from "@/lib/api";
 import { assertOrganizationAccess, requireActiveAccount, requireAuth } from "@/lib/authorization";
 import { writeActivity, writeAudit } from "@/lib/audit";
@@ -60,6 +60,14 @@ export async function POST(request: NextRequest) {
         clientVisible: stage.clientVisible,
       })));
       await tx.insert(workflowSteps).values(stageRows);
+      const channelRows = await tx.select({ id: marketplaces.id, slug: marketplaces.slug }).from(marketplaces);
+      const listingRows = created.flatMap((product, index) => {
+        const requested = productValues[index]?.targetMarketplace?.split(",").map((name) => name.trim().toLowerCase().replace(" ", "")) || [];
+        return channelRows.filter((channel) => requested.includes(channel.slug)).map((channel) => ({
+          productId: product.id, marketplaceId: channel.id, status: "not_published" as const,
+        }));
+      });
+      if (listingRows.length) await tx.insert(marketplaceListings).values(listingRows).onConflictDoNothing();
       return created;
     });
     await writeActivity({ actorId: user.id, organizationId, entityType: "product", action: "products.imported", description: `${inserted.length} products were imported for production.`, visibility: "client", metadata: { count: inserted.length } });
