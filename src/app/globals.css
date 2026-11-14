@@ -538,3 +538,19 @@ a { color: inherit; text-decoration: none; }
   .auth-form-top-actions { gap: 6px; }
   .install-app-guide { right: -8px; }
 }
+
+
+/* Readability pass: slightly larger typography across the web portal */
+body { font-size: 16px; }
+@media (min-width: 821px) {
+  .portal-shell { zoom: 1.035; }
+}
+.portal-kicker, .eyebrow { font-size: 11px; }
+.field-label { font-size: 14px; }
+.field-label input, .field-label select, .field-label textarea, .form-control { font-size: 14px; }
+.button { font-size: 14px; }
+.button-small { font-size: 12px; }
+.text-button { font-size: 13px; }
+.auth-description, .auth-switch { font-size: 15px; }
+.data-table th, .data-table td { font-size: 14px; }
+.toast { font-size: 13px; }
