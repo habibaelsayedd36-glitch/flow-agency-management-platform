@@ -64,7 +64,10 @@ export function PortalApp() {
   const [dashboardData, setDashboardData] = useState<PortalDashboardData | null>(null);
   const [booting, setBooting] = useState(true);
   const [language, setLanguage] = useState<"en" | "ar">("en");
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof window === "undefined") return "light";
+    return window.localStorage.getItem("flow-theme") === "dark" ? "dark" : "light";
+  });
   const [activeView, setActiveView] = useState("home");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [modal, setModal] = useState<ModalState>(null);
@@ -77,8 +80,6 @@ export function PortalApp() {
   useEffect(() => {
     const stored = window.localStorage.getItem("flow-language");
     if (stored === "ar" || stored === "en") setLanguage(stored);
-    const savedTheme = window.localStorage.getItem("flow-theme");
-    if (savedTheme === "dark" || savedTheme === "light") setTheme(savedTheme);
   }, []);
 
   useEffect(() => {
