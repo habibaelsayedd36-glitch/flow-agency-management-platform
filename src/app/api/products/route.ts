@@ -1,7 +1,7 @@
 import { and, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { products, projectMembers, projects, workflowSteps } from "@/db/schema";
+import { marketplaceListings, marketplaces, products, projectMembers, projects, workflowSteps } from "@/db/schema";
 import { apiError, assertSameOrigin, optionalText, requireText } from "@/lib/api";
 import { assertOrganizationAccess, canManageWork, requireActiveAccount, requireAuth } from "@/lib/authorization";
 import { writeActivity, writeAudit } from "@/lib/audit";
@@ -97,6 +97,11 @@ export async function POST(request: NextRequest) {
         startedAt: index === 0 ? new Date() : null,
         clientVisible: stage.clientVisible,
       })));
+      if (targetMarketplaces.length) {
+        const slugs = targetMarketplaces.map((name) => name.toLowerCase().replace(" ", ""));
+        const channels = await tx.select({ id: marketplaces.id }).from(marketplaces).where(inArray(marketplaces.slug, slugs));
+        if (channels.length) await tx.insert(marketplaceListings).values(channels.map((channel) => ({ productId: inserted[0].id, marketplaceId: channel.id, status: "not_published" as const }))).onConflictDoNothing();
+      }
       return inserted;
     });
     await writeActivity({ actorId: user.id, organizationId, entityType: "product", entityId: product.id, action: "product.submitted", description: `${product.name} was submitted for production.`, visibility: "client" });
