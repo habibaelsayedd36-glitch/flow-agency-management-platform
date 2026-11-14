@@ -520,3 +520,21 @@ a { color: inherit; text-decoration: none; }
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
+
+
+/* PWA installation controls */
+.auth-form-top-actions { display: flex; align-items: center; gap: 9px; }
+.install-app-control { position: relative; display: inline-flex; align-items: center; }
+.install-app-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 0 10px; border: 1px solid #dce6d4; border-radius: 9px; color: #244b31; background: #f7faf2; font: inherit; font-size: 10px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.install-app-button:hover { border-color: #9dbb87; background: #eef5e6; }
+.install-app-guide { position: absolute; z-index: 120; top: calc(100% + 9px); right: 0; width: min(290px, calc(100vw - 32px)); padding: 14px 15px; border: 1px solid #dfe8d7; border-radius: 12px; color: #405446; background: #fff; box-shadow: 0 14px 38px rgba(14,42,23,.16); font-size: 11px; line-height: 1.55; }
+.install-app-guide[dir="rtl"] { right: auto; left: 0; }
+.install-app-guide strong { display: block; margin-bottom: 5px; color: #244b31; font-size: 12px; }
+.install-app-guide p { margin: 0; color: #718075; }
+.install-app-guide button { display: block; margin: 8px 0 0 auto; padding: 3px 0; border: 0; color: #426d39; background: transparent; font: inherit; font-weight: 700; cursor: pointer; }
+.topbar-actions .install-app-button { min-height: 31px; padding: 0 8px; }
+@media (max-width: 600px) {
+  .install-app-button { min-height: 30px; padding: 0 8px; font-size: 9px; }
+  .auth-form-top-actions { gap: 6px; }
+  .install-app-guide { right: -8px; }
+}

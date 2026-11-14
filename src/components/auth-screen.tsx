@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/flow-icons";
+import { InstallAppButton } from "@/components/install-app-button";
 
 export type AuthUserView = { id: string; fullName: string; email: string; role: string; status: string; organizationId: string | null; organizationStatus: string | null };
 export type OrganizationView = { id: string; companyName: string; contactPerson: string; phone: string | null; category: string | null; website: string | null; description: string | null; additionalRequirements: string | null; preferredLanguage: string; targetMarketplaces: string[]; requiredServices: string[]; monthlyProductEstimate: number | null; status: string; createdAt: string };
@@ -94,7 +95,8 @@ export function AuthScreen({ onAuthenticated, language, onLanguageChange }: Prop
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || text.genericError);
-        onAuthenticated();
+        setNotice(text.successText);
+        setMode("login");
         return;
       }
       if (mode === "forgot") {
@@ -141,7 +143,7 @@ export function AuthScreen({ onAuthenticated, language, onLanguageChange }: Prop
       </section>
 
       <section className="auth-form-panel">
-        <div className="auth-form-top"><span className="auth-help">{mode === "register" ? "A workspace built around your products." : "Your work, in one clear place."}</span><button type="button" className="language-toggle" onClick={() => onLanguageChange(rtl ? "en" : "ar")} aria-label="Switch language"><Icon name="globe" size={16} /> {rtl ? "EN" : "عربي"}</button></div>
+        <div className="auth-form-top"><span className="auth-help">{mode === "register" ? "A workspace built around your products." : "Your work, in one clear place."}</span><div className="auth-form-top-actions"><InstallAppButton language={language} /><button type="button" className="language-toggle" onClick={() => onLanguageChange(rtl ? "en" : "ar")} aria-label="Switch language"><Icon name="globe" size={16} /> {rtl ? "EN" : "عربي"}</button></div></div>
         <div className="auth-card-wrap">
           <div className="auth-card">
             {verificationState !== "idle" ? (

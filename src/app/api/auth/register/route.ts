@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { emailVerificationTokens, organizations, users } from "@/db/schema";
 import { apiError, assertSameOrigin, requireText } from "@/lib/api";
-import { createSession, hashPassword, hashToken, setSessionCookie } from "@/lib/auth";
+import { hashPassword, hashToken } from "@/lib/auth";
 import { writeAudit } from "@/lib/audit";
 import { safeEmailText, sendFlowEmail } from "@/lib/email";
 import { checkRateLimit, clientAddress } from "@/lib/rate-limit";
@@ -68,27 +68,38 @@ export async function POST(request: NextRequest) {
       return { organizationId: organization.id, userId: user.id };
     });
 
-    const token = await createSession(created.userId);
-    const response = NextResponse.json({ ok: true, pendingApproval: true, emailVerificationSent: false });
-    setSessionCookie(response, token);
+    let emailVerificationSent = false;
+    try {
+      const emailToken = randomBytes(32).toString("hex");
+      await db.insert(emailVerificationTokens).values({
+        userId: created.userId,
+        tokenHash: hashToken(emailToken),
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      });
+      const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+      const verificationUrl = `${origin}/?verify=${encodeURIComponent(emailToken)}`;
+      const delivery = await sendFlowEmail({
+        to: email,
+        subject: "Verify your FLOW portal email",
+        html: `<p>Hello ${safeEmailText(fullName)},</p><p>Confirm your email address to continue setting up your FLOW workspace.</p><p><a href="${verificationUrl}">Verify email address</a></p><p>This link expires in 24 hours.</p>`,
+      });
+      emailVerificationSent = delivery.delivered;
+    } catch (emailError) {
+      console.error("FLOW registration email could not be sent", emailError);
+    }
 
-    const emailToken = randomBytes(32).toString("hex");
-    await db.insert(emailVerificationTokens).values({
-      userId: created.userId,
-      tokenHash: hashToken(emailToken),
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
-    });
-    const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
-    const verificationUrl = `${origin}/?verify=${encodeURIComponent(emailToken)}`;
-    const delivery = await sendFlowEmail({
-      to: email,
-      subject: "Verify your FLOW portal email",
-      html: `<p>Hello ${safeEmailText(fullName)},</p><p>Confirm your email address to continue setting up your FLOW workspace.</p><p><a href="${verificationUrl}">Verify email address</a></p><p>This link expires in 24 hours.</p>`,
-    });
-    if (delivery.delivered) response.headers.set("x-flow-verification", "sent");
+    try {
+      await writeAudit({ actorId: created.userId, organizationId: created.organizationId, action: "client.registration_submitted", entityType: "organization", entityId: created.organizationId });
+    } catch (auditError) {
+      console.error("FLOW registration audit entry could not be written", auditError);
+    }
 
-    await writeAudit({ actorId: created.userId, organizationId: created.organizationId, action: "client.registration_submitted", entityType: "organization", entityId: created.organizationId });
-    return response;
+    return NextResponse.json({
+      ok: true,
+      pendingApproval: true,
+      emailVerificationSent,
+      message: "Your workspace request has been received. You can sign in to check its status.",
+    }, { status: 201 });
   } catch (error) {
     if (typeof error === "object" && error && "code" in error && error.code === "23505") {
       return NextResponse.json({ error: "An account with that email already exists." }, { status: 409 });
