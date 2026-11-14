@@ -1,0 +1,16 @@
+export const FLOW_WORKFLOW = [
+  { key: "submitted", label: "Product submitted", clientVisible: true },
+  { key: "initial_review", label: "Initial review", clientVisible: true },
+  { key: "waiting_information", label: "Waiting for information", clientVisible: true },
+  { key: "photography_scheduled", label: "Photography scheduled", clientVisible: true },
+  { key: "photography_in_progress", label: "Photography in progress", clientVisible: true },
+  { key: "image_editing", label: "Image editing", clientVisible: true },
+  { key: "content_creation", label: "Content creation", clientVisible: true },
+  { key: "internal_quality_review", label: "Internal quality review", clientVisible: false },
+  { key: "awaiting_client_approval", label: "Awaiting your approval", clientVisible: true },
+  { key: "revision_requested", label: "Revision requested", clientVisible: true },
+  { key: "approved", label: "Approved", clientVisible: true },
+  { key: "ready_for_publishing", label: "Ready for publishing", clientVisible: true },
+  { key: "published", label: "Published", clientVisible: true },
+  { key: "completed", label: "Completed", clientVisible: true },
+] as const;

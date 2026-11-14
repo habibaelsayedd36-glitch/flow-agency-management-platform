@@ -1,0 +1,107 @@
+"use client";
+
+import { Icon, type IconName } from "@/components/flow-icons";
+import { formatDate, formatMoney, statusLabel, type PortalDashboardData, type PortalRow } from "@/lib/portal-types";
+
+export type DashboardAction = "product" | "project" | "service" | "upload";
+
+type Props = {
+  data: PortalDashboardData;
+  user: PortalRow;
+  organization: PortalRow | null;
+  language: "en" | "ar";
+  onNavigate: (view: string) => void;
+  onAction: (action: DashboardAction) => void;
+};
+
+const statDefinitions: { key: keyof NonNullable<PortalDashboardData["stats"]>; label: string; foot: string; icon: IconName }[] = [
+  { key: "products", label: "Products submitted", foot: "Across your workspace", icon: "products" },
+  { key: "inProduction", label: "In production", foot: "Currently moving through FLOW", icon: "production" },
+  { key: "awaitingApproval", label: "Awaiting approval", foot: "Your review keeps work moving", icon: "approvals" },
+  { key: "activeProjects", label: "Active projects", foot: "Projects with work in progress", icon: "projects" },
+];
+
+const quickActions: { title: string; icon: IconName; action: DashboardAction }[] = [
+  { title: "Add a product", icon: "plus", action: "product" },
+  { title: "Create a project", icon: "projects", action: "project" },
+  { title: "Request a service", icon: "spark", action: "service" },
+  { title: "Upload files", icon: "upload", action: "upload" },
+];
+
+function StatusBadge({ status }: { status: unknown }) {
+  const value = typeof status === "string" ? status : "pending";
+  return <span className={`status-badge ${value}`}>{statusLabel(value)}</span>;
+}
+
+function EmptyState({ icon, title, detail, action, button }: { icon: IconName; title: string; detail: string; action?: () => void; button?: string }) {
+  return <div className="empty-state"><span className="empty-state-icon"><Icon name={icon} size={18} /></span><h3>{title}</h3><p>{detail}</p>{button && action && <button type="button" className="button button-secondary button-small" onClick={action}>{button}<Icon name="arrow" size={14} /></button>}</div>;
+}
+
+export function PortalDashboard({ data, user, organization, language, onNavigate, onAction }: Props) {
+  const stats = data.stats;
+  const projects = data.projects || [];
+  const activity = data.activity || [];
+  const displayName = String(user.fullName || organization?.contactPerson || "there").split(" ")[0];
+  const today = new Intl.DateTimeFormat(language === "ar" ? "ar-EG" : "en-GB", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
+  const isAdmin = user.role === "admin" || user.role === "production_manager";
+
+  return (
+    <div className="dashboard-page">
+      <section className="welcome-banner">
+        <div className="welcome-copy"><span className="eyebrow">{today} · {isAdmin ? "FLOW OPERATIONS" : "CLIENT WORKSPACE"}</span><h2>{isAdmin ? "Good to see you," : "Good to see you,"} <em>{displayName}.</em></h2><p>{isAdmin ? "Here’s what’s moving across FLOW today." : "Here’s the latest across your FLOW workspace."}</p></div>
+        {!isAdmin && <div className="welcome-meta">
+          <div className="welcome-meta-item"><span>Workspace</span><b>{organization?.companyName || "Your company"}</b></div>
+          <div className="welcome-meta-item"><span>Account manager</span><b>{projects.find((project) => project.accountManagerId)?.accountManagerName || "FLOW team"}<small>{projects.some((project) => project.accountManagerId) ? "assigned" : "here to help"}</small></b></div>
+        </div>}
+        {isAdmin && <div className="welcome-meta"><div className="welcome-meta-item"><span>Workspace</span><b>FLOW operations</b></div><div className="welcome-meta-item"><span>Today</span><b>{formatDate(new Date(), language)}</b></div></div>}
+      </section>
+
+      <section className="stats-grid" aria-label="Workspace statistics">
+        {statDefinitions.map((stat) => <article className="stat-card" key={stat.key}><div className="stat-top"><span>{stat.label}</span><span className="stat-icon"><Icon name={stat.icon} size={16} /></span></div><strong>{stats?.[stat.key] ?? 0}</strong><small>{stat.foot}</small></article>)}
+      </section>
+
+      <div className="section-header"><div><span className="section-label">WORK IN MOTION</span><h2 className="section-title">Your projects</h2></div><button className="subtle-link" type="button" onClick={() => onNavigate("projects")}>View all projects <Icon name="arrow" size={14} /></button></div>
+      <div className="dashboard-grid">
+        <section className="panel panel-pad">
+          {projects.length ? <div className="project-list">
+            {projects.slice(0, 5).map((project) => <button className="project-row project-row-button" type="button" key={project.id} onClick={() => onNavigate("projects")}>
+              <span className="project-name"><b>{project.name}</b><span>{project.projectCode} · {project.productCount || 0} products</span></span>
+              <span><span className="table-cell-label">Status</span><StatusBadge status={project.status} /></span>
+              <span className="project-manager-cell"><span className="table-cell-label">Delivery</span><b className="project-delivery-date">{project.dueDate ? formatDate(project.dueDate, language, { day: "numeric", month: "short" }) : "Date not set"}</b></span>
+              <span className="progress-cell"><span className="table-cell-label">Progress</span><span className="progress-line"><span style={{ width: `${Math.max(0, Math.min(100, Number(project.progress || 0)))}%` }} /></span><small>{Number(project.progress || 0)}% complete</small></span>
+              <Icon name="chevron" size={16} className="project-chevron" />
+            </button>)}
+          </div> : <EmptyState icon="projects" title="Your first project starts here" detail="Create a project or submit products and the FLOW team will help shape the next steps." action={() => onAction("project")} button="Create a project" />}
+        </section>
+
+        <div className="dashboard-side-stack">
+          <section className="panel panel-pad">
+            <div className="section-header"><div><span className="section-label">KEEP THINGS MOVING</span><h2 className="section-title">Needs your attention</h2></div><span className="stat-icon"><Icon name="approvals" size={16} /></span></div>
+            {(stats?.awaitingApproval || 0) > 0 ? <div className="pending-row"><div className="pending-row-copy"><b>{stats?.awaitingApproval} item{stats?.awaitingApproval === 1 ? "" : "s"} ready for your review</b><span>Open the approval workspace to respond</span></div><button className="icon-button" type="button" aria-label="Review approvals" onClick={() => onNavigate("approvals")}><Icon name="arrow" size={15} /></button></div> : <div className="attention-empty"><span className="attention-check"><Icon name="check" size={15} /></span><span><b>You’re all caught up</b><small>No approvals are waiting right now.</small></span></div>}
+            <div className="card-rule" />
+            <div className="mini-metric-grid"><button type="button" onClick={() => onNavigate("services")}><b>{stats?.serviceRequests ?? 0}</b><span>Open service requests</span></button><button type="button" onClick={() => onNavigate("billing")}><b>{stats?.outstandingInvoices ?? 0}</b><span>Outstanding invoices</span></button></div>
+            {(stats?.outstandingAmount || 0) > 0 && <div className="amount-note">Outstanding balance <b>{formatMoney(stats?.outstandingAmount, "EGP", language)}</b></div>}
+          </section>
+          <section className="service-request-card"><div className="section-header"><div><span className="section-label">NEED A HAND?</span><h2 className="section-title">A new way to move forward</h2></div><span className="stat-icon"><Icon name="spark" size={16} /></span></div><p>Request a service or send a note to your FLOW account manager. We’ll pick it up from your workspace.</p><button type="button" className="button button-primary button-small" onClick={() => onAction("service")}>Request a service <Icon name="arrow" size={14} /></button></section>
+        </div>
+      </div>
+
+      <section className="quick-actions" aria-label="Quick actions">{quickActions.map((item) => <button className="quick-action" type="button" key={item.action} onClick={() => onAction(item.action)}><span className="quick-action-icon"><Icon name={item.icon} size={16} /></span><span>{item.title}</span></button>)}</section>
+
+      <section className="panel panel-pad activity-panel">
+        <div className="section-header"><div><span className="section-label">FROM YOUR WORKSPACE</span><h2 className="section-title">Recent activity</h2></div><button type="button" className="subtle-link" onClick={() => onNavigate("notifications")}>All updates <Icon name="arrow" size={14} /></button></div>
+        {activity.length ? <div className="activity-list">{activity.slice(0, 6).map((item) => <div className="activity-item" key={item.id}><span className="activity-icon"><Icon name={activityIcon(item.entityType)} size={13} /></span><div className="activity-copy"><b>{item.description}</b><span>{formatDate(item.createdAt, language, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span></div></div>)}</div> : <EmptyState icon="clock" title="Your activity will appear here" detail="Product submissions, updates, approvals and messages will be collected in one place." />}
+      </section>
+    </div>
+  );
+}
+
+function activityIcon(entityType: unknown): IconName {
+  if (entityType === "product") return "products";
+  if (entityType === "project") return "projects";
+  if (entityType === "invoice" || entityType === "payment") return "billing";
+  if (entityType === "message") return "messages";
+  if (entityType === "approval") return "approvals";
+  if (entityType === "file") return "file";
+  return "spark";
+}
