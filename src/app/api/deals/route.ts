@@ -54,7 +54,12 @@ export async function POST(request: NextRequest) {
       const validPdf = ext === "pdf" && type === "application/pdf" && bytes.toString("ascii", 0, 5) === "%PDF-";
       const validDocx = ext === "docx" && type === DOCX && bytes[0] === 0x50 && bytes[1] === 0x4b;
       const validDoc = ext === "doc" && type === DOC && bytes.length > 8 && bytes[0] === 0xd0 && bytes[1] === 0xcf;
-      if (!validPdf && !validDocx && !validDoc) throw new ApiError(400, "Upload a valid PDF, DOC or DOCX contract.", "FILE_TYPE_REJECTED");
+      const validJpeg = (ext === "jpg" || ext === "jpeg") && type === "image/jpeg" && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+      const validPng = ext === "png" && type === "image/png" && bytes.length > 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+      const validWebp = ext === "webp" && type === "image/webp" && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP";
+      if (!validPdf && !validDocx && !validDoc && !validJpeg && !validPng && !validWebp) {
+        throw new ApiError(400, "Upload a valid PDF, DOC, DOCX, JPG, PNG or WEBP contract.", "FILE_TYPE_REJECTED");
+      }
       const safeName = contract.name.replace(/[\\/\u0000-\u001f]/g, "_").slice(0, 240);
       const [saved] = await db.insert(files).values({
         organizationId, uploadedBy: user.id, fileName: safeName, contentType: type, fileSize: contract.size,
