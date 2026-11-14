@@ -7,7 +7,7 @@ import { assertOrganizationAccess, canManageWork, requireActiveAccount, requireA
 import { writeActivity, writeAudit } from "@/lib/audit";
 import { FLOW_WORKFLOW } from "@/lib/workflow";
 
-const marketplaceNames = new Set(["Amazon", "Noon", "TikTok Shop", "Shopify", "InstaShop", "Other"]);
+const marketplaceNames = new Set(["Amazon", "Noon", "Jumia", "Shopify", "InstaShop", "Other"]);
 const productStatuses = ["submitted", "initial_review", "waiting_information", "photography_scheduled", "photography_in_progress", "image_editing", "content_creation", "internal_quality_review", "awaiting_client_approval", "revision_requested", "approved", "ready_for_publishing", "published", "completed"] as const;
 
 async function visibleProductCondition(user: Awaited<ReturnType<typeof requireAuth>>) {
@@ -56,7 +56,9 @@ export async function POST(request: NextRequest) {
     if (!organizationId) return NextResponse.json({ error: "A client workspace is required." }, { status: 400 });
     await assertOrganizationAccess(user, organizationId);
     const name = requireText(body.name, "Product name", 180);
-    const targetMarketplace = typeof body.targetMarketplace === "string" && marketplaceNames.has(body.targetMarketplace) ? body.targetMarketplace : null;
+    const marketplaceInput = Array.isArray(body.targetMarketplaces) ? body.targetMarketplaces : typeof body.targetMarketplace === "string" ? body.targetMarketplace.split(/[,;|]/) : [];
+    const targetMarketplaces = [...new Set<string>(marketplaceInput.filter((item: unknown): item is string => typeof item === "string" && marketplaceNames.has(item.trim())).map((item: string) => item.trim()))];
+    const targetMarketplace = targetMarketplaces.join(", ") || null;
     const requiredServices = Array.isArray(body.requiredServices)
       ? [...new Set<string>(body.requiredServices.filter((item: unknown): item is string => typeof item === "string" && item.length <= 80))].slice(0, 10)
       : [];
