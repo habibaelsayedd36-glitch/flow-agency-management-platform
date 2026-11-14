@@ -6,6 +6,7 @@ import { ApiError, apiError, assertSameOrigin, requireText } from "@/lib/api";
 import { assertOrganizationAccess, requireActiveAccount, requireAuth } from "@/lib/authorization";
 import { writeActivity, writeAudit } from "@/lib/audit";
 import { FLOW_WORKFLOW } from "@/lib/workflow";
+import { ensureFlowCatalog } from "@/lib/catalog";
 
 const MAX_IMPORT_BYTES = 8 * 1024 * 1024;
 
@@ -21,6 +22,7 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth(request, ["client", "admin", "account_manager", "production_manager"]);
     requireActiveAccount(user);
     const formData = await request.formData();
+    await ensureFlowCatalog();
     const file = formData.get("file");
     if (!(file instanceof File)) throw new ApiError(400, "Choose a CSV or Excel file.", "VALIDATION_ERROR");
     if (file.size > MAX_IMPORT_BYTES) throw new ApiError(400, "Import files must be smaller than 8 MB.", "FILE_TOO_LARGE");
