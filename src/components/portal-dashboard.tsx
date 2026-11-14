@@ -58,7 +58,7 @@ export function PortalDashboard({ data, user, organization, language, onNavigate
         {isAdmin && <div className="welcome-meta"><div className="welcome-meta-item"><span>Workspace</span><b>FLOW operations</b></div><div className="welcome-meta-item"><span>Today</span><b>{formatDate(new Date(), language)}</b></div></div>}
       </section>
 
-      <section className="stats-grid" aria-label=t("Workspace statistics", "إحصائيات مساحة العمل")>
+      <section className="stats-grid" aria-label={t("Workspace statistics", "إحصائيات مساحة العمل")}>
         {statDefinitions.map((stat) => <article className="stat-card" key={stat.key}><div className="stat-top"><span>{t(stat.label, arText[stat.label] || stat.label)}</span><span className="stat-icon"><Icon name={stat.icon} size={16} /></span></div><strong>{stats?.[stat.key] ?? 0}</strong><small>{t(stat.foot, arText[stat.foot] || stat.foot)}</small></article>)}
       </section>
 
@@ -79,7 +79,7 @@ export function PortalDashboard({ data, user, organization, language, onNavigate
         <div className="dashboard-side-stack">
           <section className="panel panel-pad">
             <div className="section-header"><div><span className="section-label">KEEP THINGS MOVING</span><h2 className="section-title">Needs your attention</h2></div><span className="stat-icon"><Icon name="approvals" size={16} /></span></div>
-            {(stats?.awaitingApproval || 0) > 0 ? <div className="pending-row"><div className="pending-row-copy"><b>{stats?.awaitingApproval} item{stats?.awaitingApproval === 1 ? "" : "s"} ready for your review</b><span>Open the approval workspace to respond</span></div><button className="icon-button" type="button" aria-label=t("Review approvals", "مراجعة الموافقات") onClick={() => onNavigate("approvals")}><Icon name="arrow" size={15} /></button></div> : <div className="attention-empty"><span className="attention-check"><Icon name="check" size={15} /></span><span><b>You’re all caught up</b><small>No approvals are waiting right now.</small></span></div>}
+            {(stats?.awaitingApproval || 0) > 0 ? <div className="pending-row"><div className="pending-row-copy"><b>{stats?.awaitingApproval} item{stats?.awaitingApproval === 1 ? "" : "s"} ready for your review</b><span>Open the approval workspace to respond</span></div><button className="icon-button" type="button" aria-label={t("Review approvals", "مراجعة الموافقات")} onClick={() => onNavigate("approvals")}><Icon name="arrow" size={15} /></button></div> : <div className="attention-empty"><span className="attention-check"><Icon name="check" size={15} /></span><span><b>You’re all caught up</b><small>No approvals are waiting right now.</small></span></div>}
             <div className="card-rule" />
             <div className="mini-metric-grid"><button type="button" onClick={() => onNavigate("services")}><b>{stats?.serviceRequests ?? 0}</b><span>Open service requests</span></button><button type="button" onClick={() => onNavigate("billing")}><b>{stats?.outstandingInvoices ?? 0}</b><span>Outstanding invoices</span></button></div>
             {(stats?.outstandingAmount || 0) > 0 && <div className="amount-note">Outstanding balance <b>{formatMoney(stats?.outstandingAmount, "EGP", language)}</b></div>}
@@ -88,7 +88,7 @@ export function PortalDashboard({ data, user, organization, language, onNavigate
         </div>
       </div>
 
-      <section className="quick-actions" aria-label=t("Quick actions", "إجراءات سريعة")>{quickActions.map((item) => <button className="quick-action" type="button" key={item.action} onClick={() => onAction(item.action)}><span className="quick-action-icon"><Icon name={item.icon} size={16} /></span><span>{t(item.title, arText[item.title] || item.title)}</span></button>)}</section>
+      <section className="quick-actions" aria-label={t("Quick actions", "إجراءات سريعة")}>{quickActions.map((item) => <button className="quick-action" type="button" key={item.action} onClick={() => onAction(item.action)}><span className="quick-action-icon"><Icon name={item.icon} size={16} /></span><span>{t(item.title, arText[item.title] || item.title)}</span></button>)}</section>
 
       <section className="panel panel-pad activity-panel">
         <div className="section-header"><div><span className="section-label">FROM YOUR WORKSPACE</span><h2 className="section-title">Recent activity</h2></div><button type="button" className="subtle-link" onClick={() => onNavigate("notifications")}>All updates <Icon name="arrow" size={14} /></button></div>
@@ -99,7 +99,7 @@ export function PortalDashboard({ data, user, organization, language, onNavigate
 }
 
 function activityIcon(entityType: unknown): IconName {
-  if (entityType === "product") return t("products", "منتجات");
+  if (entityType === "product") return "products";
   if (entityType === "project") return "projects";
   if (entityType === "invoice" || entityType === "payment") return "billing";
   if (entityType === "message") return "messages";
