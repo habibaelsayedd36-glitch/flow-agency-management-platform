@@ -1418,3 +1418,28 @@ html[data-theme="dark"] .install-app-guide {
 }
 html[data-theme="dark"] .install-app-guide strong { color: #c4f075; }
 html[data-theme="dark"] .install-app-guide p { color: #b5c3b7; }
+
+
+/* Bilingual typography and invoice actions */
+html[dir="rtl"] body,
+html[dir="rtl"] .portal-shell,
+html[dir="rtl"] .portal-shell :is(h1,h2,h3,h4,p,span,label,small,th,td,button,a,select,textarea,input) {
+  font-family: var(--font-arabic), Tahoma, Arial, sans-serif;
+  letter-spacing: normal;
+}
+html[dir="ltr"] body,
+html[dir="ltr"] .portal-shell {
+  font-family: var(--font-body), Arial, sans-serif;
+}
+[dir="rtl"] .content-product-card,
+[dir="rtl"] .content-product-expanded,
+[dir="rtl"] .content-preview { text-align: right; }
+[dir="rtl"] .content-version-head { flex-direction: row-reverse; }
+[dir="rtl"] .content-language-banner { text-align: right; }
+.invoice-detail-page .detail-back-row { flex-wrap: wrap; }
+@media print {
+  body * { visibility: hidden !important; }
+  .invoice-print, .invoice-print * { visibility: visible !important; }
+  .invoice-print { position: absolute !important; inset: 0 auto auto 0 !important; width: 100% !important; margin: 0 !important; padding: 24px !important; box-shadow: none !important; }
+  .print-hide { display: none !important; }
+}
