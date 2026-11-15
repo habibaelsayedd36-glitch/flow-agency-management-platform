@@ -888,3 +888,59 @@ html[dir="rtl"] .conversation-item { text-align: right; }
 :root[data-theme="dark"] .conversation-item.active { background: #29392d; }
 :root[data-theme="dark"] .message-bubble { color: var(--flow-text); border-color: var(--flow-border); background: #202d24; }
 :root[data-theme="dark"] .message-bubble.mine { color: #e0eedb; border-color: #405a43; background: #293d2c; }
+
+
+/* FLOW brand refresh + reliable theme and mobile layout */
+:root { --flow-panel: #ffffff; --flow-panel-raised: #fbfbf7; }
+:root[data-theme="dark"] { --flow-panel: #19241d; --flow-panel-raised: #202d24; color-scheme: dark; }
+html[data-theme="light"] { color-scheme: light; }
+html[data-theme="dark"], html[data-theme="dark"] body { background: var(--flow-canvas); color: var(--flow-text); }
+html[data-theme="dark"] .portal-shell, html[data-theme="dark"] .portal-content { background: var(--flow-canvas); }
+html[data-theme="dark"] .detail-card, html[data-theme="dark"] .conversation-layout, html[data-theme="dark"] .conversation-list-head, html[data-theme="dark"] .conversation-item, html[data-theme="dark"] .thread-head, html[data-theme="dark"] .message-compose, html[data-theme="dark"] .chart-panel, html[data-theme="dark"] .marketplace-card, html[data-theme="dark"] .billing-metric, html[data-theme="dark"] .service-card, html[data-theme="dark"] .approval-card, html[data-theme="dark"] .content-product-card, html[data-theme="dark"] .project-card, html[data-theme="dark"] .subscription-plan-card { color:var(--flow-text); background:var(--flow-panel); border-color:var(--flow-border); }
+html[data-theme="dark"] .conversation-list, html[data-theme="dark"] .conversation-thread, html[data-theme="dark"] .thread-messages { background:var(--flow-panel); }
+html[data-theme="dark"] .conversation-item span, html[data-theme="dark"] .marketplace-card p, html[data-theme="dark"] .service-card p, html[data-theme="dark"] .detail-help, html[data-theme="dark"] .message-bubble small { color:var(--flow-muted); }
+html[data-theme="dark"] .conversation-item.active, html[data-theme="dark"] .message-bubble.mine { background:#293d2c; }
+html[data-theme="dark"] .message-compose textarea, html[data-theme="dark"] .toolbar-select, html[data-theme="dark"] .table-status-select { color:var(--flow-text); background:#111a14; border-color:var(--flow-border); }
+html[data-theme="dark"] .data-table-wrap, html[data-theme="dark"] .data-table { background:var(--flow-panel); }
+html[data-theme="dark"] .data-table th { background:var(--flow-panel-raised); color:var(--flow-text); }
+html[data-theme="dark"] .data-table td { color:var(--flow-text); border-color:var(--flow-border); }
+html[data-theme="dark"] .button-secondary, html[data-theme="dark"] .icon-button, html[data-theme="dark"] .mobile-menu { color:var(--flow-text); background:var(--flow-panel-raised); border-color:var(--flow-border); }
+html[data-theme="dark"] .marketplace-disclaimer { color:var(--flow-muted); background:var(--flow-panel-raised); border-color:var(--flow-border); }
+@media (max-width:600px) {
+ .portal-main { width:100%; min-width:0; }
+ .portal-topbar { width:100%; height:58px; min-height:58px; display:flex; align-items:center; gap:5px; padding:0 8px; overflow:visible; }
+ .topbar-left { flex:1 1 0; min-width:0; gap:6px; }
+ .mobile-menu { width:32px; height:32px; flex:0 0 32px; }
+ .topbar-breadcrumb { min-width:0; flex:1; overflow:hidden; }
+ .topbar-breadcrumb b { display:block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; }
+ .topbar-actions { flex:0 0 auto; display:flex; align-items:center; gap:3px; min-width:0; }
+ .topbar-actions .install-app-control, .topbar-actions .topbar-icon-button[aria-label*="Search"], .topbar-actions .topbar-icon-button[aria-label*="البحث"] { display:none !important; }
+ .topbar-actions .theme-toggle, .topbar-actions .topbar-icon-button { width:30px; min-width:30px; height:30px; min-height:30px; padding:0; }
+ .topbar-actions .language-toggle { min-height:29px; padding:0 5px; gap:2px; font-size:9px; }
+ .topbar-profile { flex:0 0 auto; padding:0 !important; }
+ .topbar-profile .avatar { width:27px; height:27px; }
+ .notification-anchor { flex:0 0 auto; }
+ .notification-popover { inset-inline-end:-4px; width:min(340px,calc(100vw - 18px)); }
+ .conversation-layout { display:flex; flex-direction:column; min-width:0; width:100%; min-height:0; overflow:hidden; }
+ .conversation-list { width:100%; min-width:0; max-width:100%; flex:0 0 auto; display:flex; flex-direction:row; gap:0; max-height:126px; overflow-x:auto; overflow-y:hidden; border:0; border-bottom:1px solid var(--flow-border); -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; }
+ .conversation-list-head { display:none !important; }
+ .conversation-item { flex:0 0 172px; width:172px; min-width:172px; padding:10px; border:0; border-inline-end:1px solid var(--flow-border); text-align:start; }
+ .conversation-item span { white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+ .conversation-thread { width:100%; min-width:0; min-height:0; }
+ .thread-head { min-width:0; padding:10px 12px; }
+ .thread-messages { min-width:0; width:100%; min-height:210px; max-height:42vh; padding:11px; overflow-x:hidden; }
+ .message-bubble { max-width:88%; overflow-wrap:anywhere; word-break:break-word; }
+ .message-compose { width:100%; min-width:0; display:grid; grid-template-columns:36px minmax(0,1fr) 36px; gap:6px; align-items:end; padding:8px; }
+ .message-compose textarea { grid-column:2; grid-row:1; width:100%; min-width:0; min-height:42px; max-height:104px; resize:none; padding:9px; }
+ .message-attach-button { grid-column:1; grid-row:1; width:34px; min-width:34px; height:36px; }
+ .send-message-button { grid-column:3; grid-row:1; width:34px; min-width:34px; height:36px; }
+ .internal-toggle { grid-column:2 / 4; grid-row:2; justify-self:start; max-width:100%; }
+ .conversation-new-fields { grid-template-columns:minmax(0,1fr); }
+ .marketplace-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:370px) {
+ .topbar-actions { gap:1px; }
+ .topbar-actions .language-toggle { padding:0 4px; }
+ .topbar-actions .theme-toggle, .topbar-actions .topbar-icon-button { width:28px; min-width:28px; }
+ .conversation-item { flex-basis:156px; min-width:156px; }
+}
