@@ -28,9 +28,10 @@ const quickActions: { title: string; icon: IconName; action: DashboardAction }[]
   { title: "Upload files", icon: "upload", action: "upload" },
 ];
 
-function StatusBadge({ status }: { status: unknown }) {
+function StatusBadge({ status, language = "en" }: { status: unknown; language?: "en" | "ar" }) {
   const value = typeof status === "string" ? status : "pending";
-  return <span className={`status-badge ${value}`}>{statusLabel(value)}</span>;
+  const labels: Record<string, string> = { pending: "قيد الانتظار", in_progress: "قيد التنفيذ", completed: "مكتمل", approved: "تمت الموافقة", awaiting_client_approval: "بانتظار موافقة العميل", revision_requested: "مطلوب تعديل", on_hold: "متوقف مؤقتًا", cancelled: "ملغي", published: "تم النشر", draft: "مسودة" };
+  return <span className={`status-badge ${value}`}>{language === "ar" ? (labels[value] || statusLabel(value)) : statusLabel(value)}</span>;
 }
 
 function EmptyState({ icon, title, detail, action, button }: { icon: IconName; title: string; detail: string; action?: () => void; button?: string }) {
@@ -52,8 +53,8 @@ export function PortalDashboard({ data, user, organization, language, onNavigate
       <section className="welcome-banner">
         <div className="welcome-copy"><span className="eyebrow">{today} · {isAdmin ? t("FLOW OPERATIONS", "عمليات FLOW") : t("CLIENT WORKSPACE", "مساحة عمل العميل")}</span><h2>{isAdmin ? t("Good to see you,", "سعداء بوجودك،") : t("Good to see you,", "سعداء بوجودك،")} <em>{displayName}.</em></h2><p>{isAdmin ? t("Here’s what’s moving across FLOW today.", "إليك آخر المستجدات في FLOW اليوم.") : t("Here’s the latest across your FLOW workspace.", "إليك آخر المستجدات في مساحة عملك على FLOW.")}</p></div>
         {!isAdmin && <div className="welcome-meta">
-          <div className="welcome-meta-item"><span>Workspace</span><b>{organization?.companyName || t("Your company", "شركتك")}</b></div>
-          <div className="welcome-meta-item"><span>Account manager</span><b>{projects.find((project) => project.accountManagerId)?.accountManagerName || t("FLOW team", "فريق FLOW")}<small>{projects.some((project) => project.accountManagerId) ? t("assigned", "تم التعيين") : t("here to help", "جاهز للمساعدة")}</small></b></div>
+          <div className="welcome-meta-item"><span>{t("Workspace", "مساحة العمل")}</span><b>{organization?.companyName || t("Your company", "شركتك")}</b></div>
+          <div className="welcome-meta-item"><span>{t("Account manager", "مدير الحساب")}</span><b>{projects.find((project) => project.accountManagerId)?.accountManagerName || t("FLOW team", "فريق FLOW")}<small>{projects.some((project) => project.accountManagerId) ? t("assigned", "تم التعيين") : t("here to help", "جاهز للمساعدة")}</small></b></div>
         </div>}
         {isAdmin && <div className="welcome-meta"><div className="welcome-meta-item"><span>Workspace</span><b>FLOW operations</b></div><div className="welcome-meta-item"><span>Today</span><b>{formatDate(new Date(), language)}</b></div></div>}
       </section>
@@ -62,15 +63,15 @@ export function PortalDashboard({ data, user, organization, language, onNavigate
         {statDefinitions.map((stat) => <article className="stat-card" key={stat.key}><div className="stat-top"><span>{t(stat.label, arText[stat.label] || stat.label)}</span><span className="stat-icon"><Icon name={stat.icon} size={16} /></span></div><strong>{stats?.[stat.key] ?? 0}</strong><small>{t(stat.foot, arText[stat.foot] || stat.foot)}</small></article>)}
       </section>
 
-      <div className="section-header"><div><span className="section-label">WORK IN MOTION</span><h2 className="section-title">Your projects</h2></div><button className="subtle-link" type="button" onClick={() => onNavigate("projects")}>View all projects <Icon name="arrow" size={14} /></button></div>
+      <div className="section-header"><div><span className="section-label">{t("WORK IN MOTION", "العمل الجاري")}</span><h2 className="section-title">{t("Your projects", "مشروعاتك")}</h2></div><button className="subtle-link" type="button" onClick={() => onNavigate("projects")}>{t("View all projects", "عرض كل المشروعات")} <Icon name="arrow" size={14} /></button></div>
       <div className="dashboard-grid">
         <section className="panel panel-pad">
           {projects.length ? <div className="project-list">
             {projects.slice(0, 5).map((project) => <button className="project-row project-row-button" type="button" key={project.id} onClick={() => onNavigate("projects")}>
-              <span className="project-name"><b>{project.name}</b><span>{project.projectCode} · {project.productCount || 0} products</span></span>
-              <span><span className="table-cell-label">Status</span><StatusBadge status={project.status} /></span>
-              <span className="project-manager-cell"><span className="table-cell-label">Delivery</span><b className="project-delivery-date">{project.dueDate ? formatDate(project.dueDate, language, { day: "numeric", month: "short" }) : t("Date not set", "لم يُحدد التاريخ")}</b></span>
-              <span className="progress-cell"><span className="table-cell-label">Progress</span><span className="progress-line"><span style={{ width: `${Math.max(0, Math.min(100, Number(project.progress || 0)))}%` }} /></span><small>{Number(project.progress || 0)}% complete</small></span>
+              <span className="project-name"><b>{project.name}</b><span>{project.projectCode} · {project.productCount || 0} {t("products", "منتج")}</span></span>
+              <span><span className="table-cell-label">{t("Status", "الحالة")}</span><StatusBadge status={project.status} language={language} /></span>
+              <span className="project-manager-cell"><span className="table-cell-label">{t("Delivery", "التسليم")}</span><b className="project-delivery-date">{project.dueDate ? formatDate(project.dueDate, language, { day: "numeric", month: "short" }) : t("Date not set", "لم يُحدد التاريخ")}</b></span>
+              <span className="progress-cell"><span className="table-cell-label">{t("Progress", "التقدم")}</span><span className="progress-line"><span style={{ width: `${Math.max(0, Math.min(100, Number(project.progress || 0)))}%` }} /></span><small>{Number(project.progress || 0)}% complete</small></span>
               <Icon name="chevron" size={16} className="project-chevron" />
             </button>)}
           </div> : <EmptyState icon="projects" title={t("Your first project starts here", "مشروعك الأول يبدأ من هنا")} detail={t("Create a project or submit products and the FLOW team will help shape the next steps.", "أنشئ مشروعًا أو أضف منتجاتك وسيساعدك فريق FLOW في تحديد الخطوات التالية.")} action={() => onAction("project")} button={t("Create a project", "إنشاء مشروع")} />}
