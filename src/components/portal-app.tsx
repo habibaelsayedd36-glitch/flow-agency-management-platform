@@ -55,12 +55,10 @@ function roleLabel(role: string) {
 }
 
 function logo(variant: "green" | "white" = "green") {
-  const ink = variant === "white" ? "#fbfbf7" : "#143c28";
-  return <svg className="flow-lockup" viewBox="0 0 600 180" role="img" aria-label="FLOW service provider">
-    <defs><path id="flow-tagline-arc" d="M 270 40 C 320 -4 390 12 410 88" /></defs>
-    <text x="8" y="151" fill={ink} fontFamily="Arial, sans-serif" fontSize="154" fontWeight="800" letterSpacing="-10">FLOW</text>
-    <text fill="#c4f075" fontFamily="Arial, sans-serif" fontSize="26" fontWeight="700" letterSpacing="1.2"><textPath href="#flow-tagline-arc" startOffset="0%">service provider.</textPath></text>
-  </svg>;
+  const src = variant === "white"
+    ? "https://www.flow-agency-eg.com/assets/logo/flow-lockup-white.png"
+    : "https://www.flow-agency-eg.com/assets/logo/flow-lockup-green.png";
+  return <img className="flow-lockup" src={src} alt="FLOW Agency" />;
 }
 
 export function PortalApp() {
@@ -90,6 +88,7 @@ export function PortalApp() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.lang = language;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#0f1711" : "#143c28");
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
     window.localStorage.setItem("flow-theme", theme);
   }, [theme, language]);
