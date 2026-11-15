@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       projectName,
       productQuantity,
       description: optionalText(body.description, 4000),
-      targetMarketplace: optionalText(body.targetMarketplace, 80),
+      targetMarketplace: Array.isArray(body.targetMarketplaces) ? [...new Set(body.targetMarketplaces.filter((item: unknown): item is string => typeof item === "string" && ["Amazon", "Noon", "Jumia", "Shopify", "InstaShop", "Other"].includes(item)))].join(", ") || null : optionalText(body.targetMarketplace, 400),
       desiredDeadline,
       priority: ["low", "normal", "high", "urgent"].includes(body.priority) ? body.priority : "normal",
       status: "submitted",
