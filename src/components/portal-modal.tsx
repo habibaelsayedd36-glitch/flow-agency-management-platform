@@ -81,7 +81,7 @@ export function PortalModal({ modal, user, organization, language, onClose, onDo
       } else if (modal.type === "service") {
         await requestJson("/api/services", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
           organizationId: currentOrganizationId, serviceId: get("serviceId"), projectName: get("projectName"), productQuantity, description: get("description"),
-          targetMarketplace: get("targetMarketplace"), desiredDeadline: get("desiredDeadline"), priority: get("priority"),
+          targetMarketplaces: data.getAll("targetMarketplaces").map(String), desiredDeadline: get("desiredDeadline"), priority: get("priority"),
         }) });
         onDone("Service request submitted. Your account manager can follow up with a confirmed quote.");
       } else if (modal.type === "upload") {
@@ -156,7 +156,7 @@ export function PortalModal({ modal, user, organization, language, onClose, onDo
         {modal.type === "service" && <>
           <label className="field-label">Service type<select name="serviceId" required defaultValue=""><option value="">Choose a FLOW service</option>{services.map((service) => <option key={service.id} value={service.id}>{service.name}{service.price !== null ? ` · ${new Intl.NumberFormat("en-EG", { style: "currency", currency: service.currency || "EGP", maximumFractionDigits: 0 }).format(Number(service.price))} ${service.unitType === "per_item" ? "per item" : service.unitType === "monthly" ? "monthly" : ""}` : ""}</option>)}</select></label>
           <TextField label={t("Request or project name", "اسم الطلب أو المشروع")} name="projectName" required placeholder="What should we call this request?" />
-          <div className="form-grid-two"><label className="field-label">Product quantity<input name="productQuantity" type="number" min="1" max="100000" value={productQuantity} onChange={(event) => setProductQuantity(Number(event.target.value))} required /></label><label className="field-label">Target marketplace<select name="targetMarketplace" defaultValue=""><option value="">Not specified</option><option>Amazon</option><option>Noon</option><option>Jumia</option><option>Shopify</option><option>InstaShop</option><option>Other</option></select></label></div>
+          <div className="form-grid-two"><label className="field-label">Product quantity<input name="productQuantity" type="number" min="1" max="100000" value={productQuantity} onChange={(event) => setProductQuantity(Number(event.target.value))} required /></label><fieldset className="choice-field"><legend>{t("Target marketplaces · select all that apply", "المنصات المستهدفة · يمكنك اختيار أكثر من منصة")}</legend><div className="choice-row">{["Amazon", "Noon", "Jumia", "Shopify", "InstaShop", "Other"].map((item) => <label key={item} className="choice-chip"><input type="checkbox" name="targetMarketplaces" value={item} />{item}</label>)}</div></fieldset></div>
           <TextField label={t("Desired deadline", "الموعد النهائي المطلوب")} name="desiredDeadline" type="date" />
           <TextField label={t("Brief and requirements", "ملخص ومتطلبات الطلب")} name="description" rows={4} placeholder="Include any details or references that will help us scope the request." />
           <div className="form-alert success-alert">Public price references are indicative only. FLOW will confirm your quote and delivery date before work begins.</div>
