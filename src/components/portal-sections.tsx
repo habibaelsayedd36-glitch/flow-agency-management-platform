@@ -393,7 +393,7 @@ function MessagesView({ conversations, user, language, onToast, onRefresh }: { c
       </button>)}
       {!conversations.length && !newConversation && <div className="empty-inline conversation-empty">{t("No conversations yet.", "لا توجد محادثات حتى الآن.")}</div>}
     </aside>
-    <section className="conversation-thread">
+    <section className={`conversation-thread ${newConversation ? "new-conversation-active" : ""}`}>
       <header className="thread-head">
         <button type="button" className="conversation-back-button" onClick={() => setMobileThreadOpen(false)}><Icon name="arrow" size={14} />{t("Conversations", "المحادثات")}</button>
         <div className="thread-head-copy"><b>{newConversation ? t("New conversation", "محادثة جديدة") : active?.subject || t("Select a conversation", "اختاري محادثة")}</b>
@@ -413,16 +413,16 @@ function MessagesView({ conversations, user, language, onToast, onRefresh }: { c
           <small>{message.senderName || (message.senderId === user.id ? t("You", "أنتِ") : t("FLOW team", "فريق FLOW"))} · {formatDate(message.createdAt, language, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small>
           {message.attachments?.map((file: PortalRow) => <a className="message-attachment" href={`/api/files/${file.fileId}`} key={file.fileId}><Icon name="file" size={13} />{file.fileName}<Icon name="download" size={12} /></a>)}
         </article>) : <div className="thread-empty">
-          <span className="empty-state-icon"><Icon name="messages" size={18} /></span>
-          <p>{newConversation ? t("Write a message to start the conversation.", "اكتبي رسالة لبدء المحادثة.") : t("Your conversation history will appear here.", "سجل المحادثة هيظهر هنا.")}</p>
-        </div>}
+          <span className="empty-state-icon"><Icon name="message-circle" size={18} /></span>
+          <p>{t("Your conversation history will appear here.", "سجل المحادثة هيظهر هنا.")}</p>
+        </div> : null}
       </div>
       {attachmentIds.length > 0 && <div className="attached-pills">{attachmentIds.map((id, index) => <span key={id}><Icon name="file" size={12} />{t("Attachment", "مرفق")} {index + 1}<button type="button" onClick={() => setAttachmentIds((current) => current.filter((item) => item !== id))} aria-label={t("Remove attachment", "إزالة المرفق")}><Icon name="close" size={12} /></button></span>)}</div>}
       <form className="message-compose" onSubmit={sendMessage}>
         <label className="message-attach-button" aria-label={t("Attach file", "إرفاق ملف")} title={t("Attach file", "إرفاق ملف")}><Icon name="file" size={17} /><input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.csv,.xlsx" onChange={attachFile} disabled={uploading} /></label>
         <textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder={uploading ? t("Uploading attachment…", "جارٍ رفع المرفق…") : t("Write a message…", "اكتبي رسالة…")} rows={1} maxLength={5000} required />
         {user.role !== "client" && <label className="internal-toggle" title={t("Internal note only", "ملاحظة داخلية فقط")}><input type="checkbox" checked={internal} onChange={(event) => setInternal(event.target.checked)} /><span>{t("Internal", "داخلي")}</span></label>}
-        <button type="submit" className="send-message-button" disabled={!body.trim() || busy || uploading} aria-label={t("Send message", "إرسال الرسالة")} title={t("Send message", "إرسال الرسالة")}><Icon name="send" size={17} /></button>
+        <button type="submit" className="send-message-button" disabled={!body.trim() || busy || uploading} aria-label={t("Send message", "إرسال الرسالة")} title={t("Send message", "إرسال الرسالة")}><Icon name="send" size={16} /><span>{t("Send", "إرسال")}</span></button>
       </form>
     </section>
   </div>;
