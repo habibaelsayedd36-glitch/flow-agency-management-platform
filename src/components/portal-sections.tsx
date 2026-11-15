@@ -374,7 +374,54 @@ function MessagesView({ conversations, user, language, onToast, onRefresh }: { c
   };
 
   const messages = thread?.messages || [];
-  return <div className="conversation-layout"><aside className="conversation-list"><div className="conversation-list-head"><b>Conversations</b><button type="button" className="icon-button" aria-label="New conversation" onClick={() => { setNewConversation(true); setConversationId(""); setThread(null); setBody(""); }}><Icon name="plus" size={16} /></button></div>{conversations.map((conversation) => <button type="button" key={conversation.id} className={`conversation-item ${conversation.id === conversationId && !newConversation ? "active" : ""}`} onClick={() => { setConversationId(conversation.id); setNewConversation(false); setAttachmentIds([]); }}><b>{conversation.subject}</b><span>{conversation.lastMessage?.body || "No messages yet"}</span>{conversation.unreadCount > 0 && <small className="conversation-unread">{conversation.unreadCount} unread</small>}</button>)}{!conversations.length && !newConversation && <div className="empty-inline conversation-empty">No conversations yet.</div>}</aside><section className="conversation-thread"><header className="thread-head"><b>{newConversation ? "New conversation" : active?.subject || "Select a conversation"}</b><span>{newConversation ? "Send a message to start a FLOW conversation." : active?.projectId ? "Linked to a project" : "FLOW account support"}</span></header>{newConversation && user.role !== "client" && <div className="conversation-new-fields"><label className="field-label">Workspace ID<input value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)} placeholder="Client workspace ID" /></label><label className="field-label">Subject<input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="Conversation subject" /></label></div>}{newConversation && user.role === "client" && <div className="conversation-new-fields"><label className="field-label">Subject<input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="How can FLOW help?" /></label></div>}<div className="thread-messages">{messages.length ? messages.map((message: PortalRow) => <article className={`message-bubble ${message.senderId === user.id ? "mine" : ""} ${message.isInternal ? "internal-message" : ""}`} key={message.id}>{message.isInternal && <span className="internal-message-label">FLOW ONLY · INTERNAL NOTE</span>}{message.body}<small>{message.senderName || (message.senderId === user.id ? "You" : "FLOW team")} · {formatDate(message.createdAt, language, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small>{message.attachments?.map((file: PortalRow) => <a className="message-attachment" href={`/api/files/${file.fileId}`} key={file.fileId}><Icon name="file" size={13} />{file.fileName}<Icon name="download" size={12} /></a>)}</article>) : <div className="thread-empty"><span className="empty-state-icon"><Icon name="messages" size={18} /></span><p>{newConversation ? "Write a message to start the conversation." : "Your conversation history will appear here."}</p></div>}</div>{attachmentIds.length > 0 && <div className="attached-pills">{attachmentIds.map((id, index) => <span key={id}><Icon name="file" size={12} />Attachment {index + 1}<button type="button" onClick={() => setAttachmentIds((current) => current.filter((item) => item !== id))} aria-label="Remove attachment"><Icon name="close" size={12} /></button></span>)}</div>}<form className="message-compose" onSubmit={sendMessage}><label className="message-attach-button" aria-label="Attach file"><Icon name="file" size={17} /><input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.csv,.xlsx" onChange={attachFile} disabled={uploading} /></label><textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder={uploading ? "Uploading attachment…" : "Write a message…"} rows={1} maxLength={5000} required />{user.role !== "client" && <label className="internal-toggle" title="Internal note only"><input type="checkbox" checked={internal} onChange={(event) => setInternal(event.target.checked)} /><span>Internal</span></label>}<button type="submit" className="send-message-button" disabled={!body.trim() || busy || uploading} aria-label="Send message"><Icon name="send" size={17} /></button></form></section></div>;
+  const rtl = language === "ar";
+  return <div className="conversation-layout" dir={rtl ? "rtl" : "ltr"}>
+    <aside className="conversation-list" aria-label={t("Conversation list", "قائمة المحادثات")}>
+      <div className="conversation-list-head">
+        <b>{t("Conversations", "المحادثات")}</b>
+        <button type="button" className="icon-button" aria-label={t("New conversation", "محادثة جديدة")} title={t("New conversation", "محادثة جديدة")} onClick={() => { setNewConversation(true); setConversationId(""); setThread(null); setBody(""); setSubject(""); setWorkspaceId(""); setProjectId(""); setAttachmentIds([]); }}>
+          <Icon name="plus" size={16} />
+        </button>
+      </div>
+      {conversations.map((conversation) => <button type="button" key={conversation.id} className={`conversation-item ${conversation.id === conversationId && !newConversation ? "active" : ""}`} onClick={() => { setConversationId(conversation.id); setNewConversation(false); setAttachmentIds([]); }}>
+        <b>{conversation.subject}</b>
+        <span>{conversation.lastMessage?.body || t("No messages yet", "لا توجد رسائل بعد")}</span>
+        {conversation.unreadCount > 0 && <small className="conversation-unread">{conversation.unreadCount} {t("unread", "غير مقروءة")}</small>}
+      </button>)}
+      {!conversations.length && !newConversation && <div className="empty-inline conversation-empty">{t("No conversations yet.", "لا توجد محادثات حتى الآن.")}</div>}
+    </aside>
+    <section className="conversation-thread">
+      <header className="thread-head">
+        <b>{newConversation ? t("New conversation", "محادثة جديدة") : active?.subject || t("Select a conversation", "اختاري محادثة")}</b>
+        <span>{newConversation ? t("Send a message to start a FLOW conversation.", "ابعتي رسالة لبدء محادثة مع FLOW.") : active?.projectId ? t("Linked to a project", "مرتبطة بمشروع") : t("FLOW account support", "دعم حساب FLOW")}</span>
+      </header>
+      {newConversation && user.role !== "client" && <div className="conversation-new-fields">
+        <label className="field-label">{t("Workspace ID", "رقم مساحة العمل")}<input value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)} placeholder={t("Client workspace ID", "رقم مساحة عمل العميل")} /></label>
+        <label className="field-label">{t("Subject", "الموضوع")}<input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder={t("Conversation subject", "موضوع المحادثة")} /></label>
+      </div>}
+      {newConversation && user.role === "client" && <div className="conversation-new-fields">
+        <label className="field-label">{t("Subject", "الموضوع")}<input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder={t("How can FLOW help?", "إزاي نقدر نساعدك؟")} /></label>
+      </div>}
+      <div className="thread-messages" aria-live="polite">
+        {messages.length ? messages.map((message: PortalRow) => <article className={`message-bubble ${message.senderId === user.id ? "mine" : ""} ${message.isInternal ? "internal-message" : ""}`} key={message.id}>
+          {message.isInternal && <span className="internal-message-label">{t("FLOW ONLY · INTERNAL NOTE", "لفريق FLOW فقط · ملاحظة داخلية")}</span>}
+          {message.body}
+          <small>{message.senderName || (message.senderId === user.id ? t("You", "أنتِ") : t("FLOW team", "فريق FLOW"))} · {formatDate(message.createdAt, language, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small>
+          {message.attachments?.map((file: PortalRow) => <a className="message-attachment" href={`/api/files/${file.fileId}`} key={file.fileId}><Icon name="file" size={13} />{file.fileName}<Icon name="download" size={12} /></a>)}
+        </article>) : <div className="thread-empty">
+          <span className="empty-state-icon"><Icon name="messages" size={18} /></span>
+          <p>{newConversation ? t("Write a message to start the conversation.", "اكتبي رسالة لبدء المحادثة.") : t("Your conversation history will appear here.", "سجل المحادثة هيظهر هنا.")}</p>
+        </div>}
+      </div>
+      {attachmentIds.length > 0 && <div className="attached-pills">{attachmentIds.map((id, index) => <span key={id}><Icon name="file" size={12} />{t("Attachment", "مرفق")} {index + 1}<button type="button" onClick={() => setAttachmentIds((current) => current.filter((item) => item !== id))} aria-label={t("Remove attachment", "إزالة المرفق")}><Icon name="close" size={12} /></button></span>)}</div>}
+      <form className="message-compose" onSubmit={sendMessage}>
+        <label className="message-attach-button" aria-label={t("Attach file", "إرفاق ملف")} title={t("Attach file", "إرفاق ملف")}><Icon name="file" size={17} /><input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.csv,.xlsx" onChange={attachFile} disabled={uploading} /></label>
+        <textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder={uploading ? t("Uploading attachment…", "جارٍ رفع المرفق…") : t("Write a message…", "اكتبي رسالة…")} rows={1} maxLength={5000} required />
+        {user.role !== "client" && <label className="internal-toggle" title={t("Internal note only", "ملاحظة داخلية فقط")}><input type="checkbox" checked={internal} onChange={(event) => setInternal(event.target.checked)} /><span>{t("Internal", "داخلي")}</span></label>}
+        <button type="submit" className="send-message-button" disabled={!body.trim() || busy || uploading} aria-label={t("Send message", "إرسال الرسالة")} title={t("Send message", "إرسال الرسالة")}><Icon name="send" size={17} /></button>
+      </form>
+    </section>
+  </div>;
 }
 
 function ReportsView({ data, language }: { data: PortalRow; language: "en" | "ar" }) {
