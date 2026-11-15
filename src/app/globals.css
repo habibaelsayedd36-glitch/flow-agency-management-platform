@@ -1369,3 +1369,52 @@ html[data-theme="dark"] .conversation-back-button {
   .send-message-button { width:64px; min-width:64px; gap:4px; font-size:10px; }
 }
 html[data-theme="dark"] .message-attach-button { color:var(--flow-text); background:var(--flow-panel-raised); border-color:var(--flow-border); }
+
+
+/* Keep the Install app action visible in the mobile top bar. */
+@media (max-width: 600px) {
+  .topbar-actions .install-app-control {
+    display: inline-flex !important;
+    flex: 0 0 auto;
+    align-items: center;
+  }
+  .topbar-actions .install-app-button {
+    display: inline-flex;
+    min-width: 0;
+    min-height: 30px;
+    padding: 0 7px;
+    gap: 4px;
+    border-radius: 9px;
+    font-size: 9px;
+    line-height: 1;
+  }
+  .topbar-actions .install-app-button svg {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+  }
+  .topbar-actions { gap: 4px; }
+  .install-app-guide {
+    position: fixed;
+    top: 68px;
+    right: 10px;
+    left: auto;
+    width: min(290px, calc(100vw - 20px));
+  }
+  html[dir="rtl"] .install-app-guide {
+    right: auto;
+    left: 10px;
+  }
+}
+html[data-theme="dark"] .install-app-button {
+  color: #d9efc7;
+  background: #1d3024;
+  border-color: #3d5945;
+}
+html[data-theme="dark"] .install-app-guide {
+  color: #e5eee5;
+  background: #17241b;
+  border-color: #3d5945;
+}
+html[data-theme="dark"] .install-app-guide strong { color: #c4f075; }
+html[data-theme="dark"] .install-app-guide p { color: #b5c3b7; }
