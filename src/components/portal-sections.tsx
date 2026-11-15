@@ -312,6 +312,7 @@ function PaymentsView({ payments, language }: { payments: PortalRow[]; language:
 function MessagesView({ conversations, user, language, onToast, onRefresh }: { conversations: PortalRow[]; user: AuthUserView; language: "en" | "ar"; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
   const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [conversationId, setConversationId] = useState("");
+  const [mobileThreadOpen, setMobileThreadOpen] = useState(false);
   const [thread, setThread] = useState<PortalRow | null>(null);
   const [body, setBody] = useState("");
   const [internal, setInternal] = useState(false);
@@ -340,19 +341,21 @@ function MessagesView({ conversations, user, language, onToast, onRefresh }: { c
     setBusy(true);
     try {
       const payload: PortalRow = { body: body.trim(), fileIds: attachmentIds, isInternal: internal };
+      let nextConversationId = conversationId;
       if (newConversation || !conversationId) {
         payload.subject = subject.trim() || "Client support";
         if (user.role !== "client") payload.organizationId = workspaceId;
         if (projectId) payload.projectId = projectId;
         const result = await requestJson<{ message: PortalRow }>("/api/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-        setConversationId(result.message.conversationId);
+        nextConversationId = result.message.conversationId;
+        setConversationId(nextConversationId);
         setNewConversation(false);
       } else {
         await requestJson(`/api/messages/${conversationId}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       }
       setBody(""); setAttachmentIds([]); setInternal(false); onToast(internal ? "Internal note saved for FLOW staff." : "Message sent."); onRefresh();
-      if (conversationId) {
-        const result = await requestJson(`/api/messages/${conversationId}`);
+      if (nextConversationId) {
+        const result = await requestJson(`/api/messages/${nextConversationId}`);
         setThread(result);
       }
     } catch (error) { onToast(error instanceof Error ? error.message : "Message could not be sent.", true); }
@@ -375,15 +378,15 @@ function MessagesView({ conversations, user, language, onToast, onRefresh }: { c
 
   const messages = thread?.messages || [];
   const rtl = language === "ar";
-  return <div className="conversation-layout" dir={rtl ? "rtl" : "ltr"}>
+  return <div className={`conversation-layout ${mobileThreadOpen ? "mobile-thread-open" : ""}`} dir={rtl ? "rtl" : "ltr"}>
     <aside className="conversation-list" aria-label={t("Conversation list", "قائمة المحادثات")}>
       <div className="conversation-list-head">
         <b>{t("Conversations", "المحادثات")}</b>
-        <button type="button" className="icon-button" aria-label={t("New conversation", "محادثة جديدة")} title={t("New conversation", "محادثة جديدة")} onClick={() => { setNewConversation(true); setConversationId(""); setThread(null); setBody(""); setSubject(""); setWorkspaceId(""); setProjectId(""); setAttachmentIds([]); }}>
+        <button type="button" className="icon-button" aria-label={t("New conversation", "محادثة جديدة")} title={t("New conversation", "محادثة جديدة")} onClick={() => { setNewConversation(true); setMobileThreadOpen(true); setConversationId(""); setThread(null); setBody(""); setSubject(""); setWorkspaceId(""); setProjectId(""); setAttachmentIds([]); }}>
           <Icon name="plus" size={16} />
         </button>
       </div>
-      {conversations.map((conversation) => <button type="button" key={conversation.id} className={`conversation-item ${conversation.id === conversationId && !newConversation ? "active" : ""}`} onClick={() => { setConversationId(conversation.id); setNewConversation(false); setAttachmentIds([]); }}>
+      {conversations.map((conversation) => <button type="button" key={conversation.id} className={`conversation-item ${conversation.id === conversationId && !newConversation ? "active" : ""}`} onClick={() => { setConversationId(conversation.id); setNewConversation(false); setMobileThreadOpen(true); setAttachmentIds([]); }}>
         <b>{conversation.subject}</b>
         <span>{conversation.lastMessage?.body || t("No messages yet", "لا توجد رسائل بعد")}</span>
         {conversation.unreadCount > 0 && <small className="conversation-unread">{conversation.unreadCount} {t("unread", "غير مقروءة")}</small>}
@@ -392,8 +395,9 @@ function MessagesView({ conversations, user, language, onToast, onRefresh }: { c
     </aside>
     <section className="conversation-thread">
       <header className="thread-head">
-        <b>{newConversation ? t("New conversation", "محادثة جديدة") : active?.subject || t("Select a conversation", "اختاري محادثة")}</b>
-        <span>{newConversation ? t("Send a message to start a FLOW conversation.", "ابعتي رسالة لبدء محادثة مع FLOW.") : active?.projectId ? t("Linked to a project", "مرتبطة بمشروع") : t("FLOW account support", "دعم حساب FLOW")}</span>
+        <button type="button" className="conversation-back-button" onClick={() => setMobileThreadOpen(false)}><Icon name="arrow" size={14} />{t("Conversations", "المحادثات")}</button>
+        <div className="thread-head-copy"><b>{newConversation ? t("New conversation", "محادثة جديدة") : active?.subject || t("Select a conversation", "اختاري محادثة")}</b>
+        <span>{newConversation ? t("Send a message to start a FLOW conversation.", "ابعتي رسالة لبدء محادثة مع FLOW.") : active?.projectId ? t("Linked to a project", "مرتبطة بمشروع") : t("FLOW account support", "دعم حساب FLOW")}</span></div>
       </header>
       {newConversation && user.role !== "client" && <div className="conversation-new-fields">
         <label className="field-label">{t("Workspace ID", "رقم مساحة العمل")}<input value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)} placeholder={t("Client workspace ID", "رقم مساحة عمل العميل")} /></label>
