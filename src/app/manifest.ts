@@ -13,9 +13,7 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#143c28",
     orientation: "portrait",
     icons: [
-      { src: "/flow-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
-      { src: "/flow-icon.svg", sizes: "192x192", type: "image/svg+xml", purpose: "any" },
-      { src: "/flow-icon.svg", sizes: "512x512", type: "image/svg+xml", purpose: "maskable" }
+      { src: "https://www.flow-agency-eg.com/assets/logo/flow-lockup-green.png", sizes: "any", type: "image/png", purpose: "any" }
     ]
   };
 }
