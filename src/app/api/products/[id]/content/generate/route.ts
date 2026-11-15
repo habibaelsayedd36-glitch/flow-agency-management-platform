@@ -24,7 +24,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: "You are an expert ecommerce marketplace listing copywriter. Generate accurate, conversion-focused Arabic (natural modern Egyptian-friendly MSA) and English product listing content. Never invent specifications, certifications, dimensions, materials, guarantees, health claims or performance claims. If details are missing, omit them. Return JSON with keys en and ar; each has title, shortDescription, fullDescription, bulletPoints (array), keywords (array). Keep keywords appropriate for marketplace search. Avoid keyword stuffing." },
-          { role: "user", content: JSON.stringify({ name: row.name, sku: row.sku, brand: row.brand, category: row.category, productType: row.productType, description: row.description, specifications: row.specifications, dimensions: row.dimensions, weight: row.weight, materials: row.materials, targetAudience: row.targetAudience, marketplaces: row.targetMarketplaces?.length ? row.targetMarketplaces : [row.targetMarketplace].filter(Boolean), clientInstructions: row.clientInstructions }) }
+          { role: "user", content: JSON.stringify({ name: row.name, sku: row.sku, brand: row.brand, category: row.category, productType: row.productType, description: row.description, specifications: row.specifications, dimensions: row.dimensions, weight: row.weight, materials: row.materials, targetAudience: row.targetAudience, marketplace: row.targetMarketplace, clientInstructions: row.clientInstructions }) }
         ],
         temperature: 0.4
       })
