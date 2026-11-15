@@ -7,7 +7,10 @@ export const metadata: Metadata = {
   description: "A secure FLOW Agency workspace for products, projects, approvals, files, services and billing.",
   applicationName: "FLOW Client Portal",
   manifest: "/manifest.webmanifest",
-  icons: { icon: "https://www.flow-agency-eg.com/assets/logo/flow-lockup-green.png", apple: "https://www.flow-agency-eg.com/assets/logo/flow-lockup-green.png" },
+  icons: {
+    icon: [{ url: "/flow-icon-v2.png", sizes: "192x192", type: "image/png" }],
+    apple: [{ url: "/apple-touch-icon-v2.png", sizes: "192x192", type: "image/png" }],
+  },
   themeColor: "#143c28",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "FLOW" },
 };
