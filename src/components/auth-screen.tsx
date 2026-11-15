@@ -10,7 +10,7 @@ export type OrganizationView = { id: string; companyName: string; contactPerson:
 type Props = { onAuthenticated: () => void; language: "en" | "ar"; onLanguageChange: (language: "en" | "ar") => void };
 type AuthMode = "login" | "register" | "forgot" | "reset";
 
-const marketplaceOptions = ["Amazon", "Noon", "TikTok Shop", "Shopify", "InstaShop"];
+const marketplaceOptions = ["Amazon", "Noon", "Jumia", "Shopify", "InstaShop"];
 const serviceOptions = [
   ["product-photography", "Product photography"],
   ["bilingual-listing", "Bilingual listing content"],
@@ -136,7 +136,7 @@ export function AuthScreen({ onAuthenticated, language, onLanguageChange }: Prop
             <div className="auth-service"><span className="auth-service-icon"><Icon name="file" size={18} /></span><span><b>Bilingual listing content</b><small>Arabic + English, SEO considered</small></span><Icon name="arrow" size={17} className="auth-service-arrow" /></div>
             <div className="auth-service"><span className="auth-service-icon"><Icon name="marketplace" size={18} /></span><span><b>Marketplace account support</b><small>One clear production workflow</small></span><Icon name="arrow" size={17} className="auth-service-arrow" /></div>
           </div>
-          <div className="auth-trust-row"><span>Built around the platforms you sell on</span><div className="marketplace-wordmarks"><b>amazon</b><b>noon</b><b>Shopify</b><b>TikTok Shop</b></div></div>
+          <div className="auth-trust-row"><span>Built around the platforms you sell on</span><div className="marketplace-wordmarks"><b>amazon</b><b>noon</b><b>Shopify</b><b>Jumia</b></div></div>
         </div>
         <div className="auth-footer-note"><span>FLOW Agency</span><span>Egypt · E-commerce content studio</span></div>
         <div className="auth-orbit auth-orbit-one" /><div className="auth-orbit auth-orbit-two" />
