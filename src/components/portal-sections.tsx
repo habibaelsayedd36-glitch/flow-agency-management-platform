@@ -413,7 +413,6 @@ function MessagesView({ conversations, user, language, onToast, onRefresh }: { c
           <small>{message.senderName || (message.senderId === user.id ? t("You", "أنتِ") : t("FLOW team", "فريق FLOW"))} · {formatDate(message.createdAt, language, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small>
           {message.attachments?.map((file: PortalRow) => <a className="message-attachment" href={`/api/files/${file.fileId}`} key={file.fileId}><Icon name="file" size={13} />{file.fileName}<Icon name="download" size={12} /></a>)}
         </article>) : !newConversation ? <div className="thread-empty">
-          <span className="empty-state-icon"><Icon name="message-circle" size={18} /></span>
           <p>{t("Your conversation history will appear here.", "سجل المحادثة هيظهر هنا.")}</p>
         </div> : null}
       </div>
