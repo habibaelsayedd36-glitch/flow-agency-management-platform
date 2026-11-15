@@ -73,8 +73,8 @@ Product facts:
 ${JSON.stringify(facts)}`;
 }
 
-async function generateWithAI(prompt: string): Promise<string> {
-  const token = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
+async function generateWithAI(prompt: string, request: NextRequest): Promise<string> {
+  const token = process.env.AI_GATEWAY_API_KEY || request.headers.get("x-vercel-oidc-token") || process.env.VERCEL_OIDC_TOKEN;
   if (!token) {
     throw new ApiError(503, "AI listing generation is not connected yet. Enable Vercel AI Gateway for this project; no client-side API key is required.", "AI_NOT_CONFIGURED");
   }
@@ -129,8 +129,8 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     const legacyMarketplace = text(source.targetMarketplace);
     const selectedMarketplaces = marketplaces.length ? marketplaces : legacyMarketplace.split(/[,·]/).map((item) => item.trim()).filter(Boolean);
     const [englishRaw, arabicRaw] = await Promise.all([
-      generateWithAI(buildPrompt(source, "en", selectedMarketplaces)),
-      generateWithAI(buildPrompt(source, "ar", selectedMarketplaces)),
+      generateWithAI(buildPrompt(source, "en", selectedMarketplaces), request),
+      generateWithAI(buildPrompt(source, "ar", selectedMarketplaces), request),
     ]);
     const generated = {
       en: parseListing(englishRaw, "en"),
