@@ -944,3 +944,14 @@ html[data-theme="dark"] .marketplace-disclaimer { color:var(--flow-muted); backg
  .topbar-actions .theme-toggle, .topbar-actions .topbar-icon-button { width:28px; min-width:28px; }
  .conversation-item { flex-basis:156px; min-width:156px; }
 }
+
+.listing-ops-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:0 0 15px; }
+.listing-ops-card { min-width:0; display:grid; grid-template-columns:38px 1fr; align-items:center; column-gap:10px; padding:15px; border:1px solid var(--flow-border); border-radius:14px; background:var(--flow-panel); }
+.listing-ops-icon { grid-row:span 2; width:36px; height:36px; display:grid; place-items:center; border-radius:11px; color:var(--flow-green); background:var(--flow-tint); }
+.listing-ops-card .section-label { font-size:9px; letter-spacing:.08em; }
+.listing-ops-card b { font-family:var(--font-display); font-size:25px; line-height:1.1; color:var(--flow-text); }
+.listing-ops-card small { grid-column:2; color:var(--flow-muted); font-size:10px; }
+.listing-ops-card.needs-attention { border-color:#e6c7a1; }
+.listing-ops-card.needs-attention .listing-ops-icon { color:#a46c18; background:#fff4df; }
+html[data-theme="dark"] .listing-ops-card { color:var(--flow-text); background:var(--flow-panel); border-color:var(--flow-border); }
+@media(max-width:600px) { .listing-ops-grid { grid-template-columns:1fr 1fr; gap:8px; } .listing-ops-card { padding:11px; grid-template-columns:30px 1fr; column-gap:7px; } .listing-ops-icon { width:29px; height:29px; } .listing-ops-card b { font-size:21px; } .listing-ops-card small { font-size:9px; } }
