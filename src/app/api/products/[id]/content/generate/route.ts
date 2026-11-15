@@ -5,41 +5,58 @@ import { products } from "@/db/schema";
 import { apiError, assertSameOrigin, ApiError } from "@/lib/api";
 import { assertProductAccess, requireActiveAccount, requireAuth } from "@/lib/authorization";
 
+function clean(value: unknown): string {
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "number") return String(value);
+  return "";
+}
+
+function unique(values: string[]): string[] {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function makeKeywords(name: string, brand: string, category: string, productType: string, marketplace: string): string[] {
+  return unique([name, brand, category, productType, ...marketplace.split(/[,·]/).map((part) => part.trim()), "online shopping", "product listing"]).slice(0, 12);
+}
+
+function buildListing(row: Record<string, unknown>, locale: "en" | "ar") {
+  const name = clean(row.name) || (locale === "ar" ? "منتج جديد" : "New Product");
+  const brand = clean(row.brand);
+  const category = clean(row.category);
+  const productType = clean(row.productType);
+  const description = clean(row.description);
+  const marketplace = clean(row.targetMarketplace);
+  const specs = row.specifications && typeof row.specifications === "object" ? Object.entries(row.specifications as Record<string, unknown>).filter(([, value]) => clean(value)) : [];
+  const specLines = specs.map(([key, value]) => locale === "ar" ? `${key}: ${clean(value)}` : `${key}: ${clean(value)}`);
+  const keywords = makeKeywords(name, brand, category, productType, marketplace);
+  if (locale === "en") {
+    const title = [brand, name, productType && productType.toLowerCase() !== name.toLowerCase() ? productType : ""].filter(Boolean).join(" ");
+    const facts = [brand && `Brand: ${brand}`, category && `Category: ${category}`, productType && `Product type: ${productType}`, ...specLines];
+    const shortDescription = description || `${name}${category ? ` in the ${category} category` : ""}. Explore the product details and specifications below.`;
+    const fullDescription = [description || `${name} is presented with the product information currently available in this listing.`, facts.length ? `Product details:\\n${facts.join("\\n")}` : "", "Please refer to the listed details for product information before purchase."].filter(Boolean).join("\\n\\n");
+    const bulletPoints = unique([brand && `Brand: ${brand}`, category && `Category: ${category}`, productType && `Product type: ${productType}`, ...specLines, description && description.slice(0, 180)]).slice(0, 5);
+    return { title: title.slice(0, 180), shortDescription: shortDescription.slice(0, 500), fullDescription: fullDescription.slice(0, 4000), bulletPoints, keywords };
+  }
+  const title = [brand, name, productType && productType.toLowerCase() !== name.toLowerCase() ? productType : ""].filter(Boolean).join(" ");
+  const facts = [brand && `العلامة التجارية: ${brand}`, category && `الفئة: ${category}`, productType && `نوع المنتج: ${productType}`, ...specLines];
+  const shortDescription = description || `${name}${category ? ` ضمن فئة ${category}` : ""}. تعرّف على تفاصيل المنتج والمواصفات المتاحة أدناه.`;
+  const fullDescription = [description || `يتم عرض ${name} وفقًا لبيانات المنتج المتاحة حاليًا.`, facts.length ? `تفاصيل المنتج:\\n${facts.join("\\n")}` : "", "يرجى مراجعة التفاصيل الموضحة قبل إتمام الشراء."].filter(Boolean).join("\\n\\n");
+  const bulletPoints = unique([brand && `العلامة التجارية: ${brand}`, category && `الفئة: ${category}`, productType && `نوع المنتج: ${productType}`, ...specLines, description && description.slice(0, 180)]).slice(0, 5);
+  return { title: title.slice(0, 180), shortDescription: shortDescription.slice(0, 500), fullDescription: fullDescription.slice(0, 4000), bulletPoints, keywords };
+}
+
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     assertSameOrigin(request);
     const user = await requireAuth(request, ["admin", "account_manager", "content_creator", "production_manager"]);
     requireActiveAccount(user);
     const { id } = await context.params;
-    const product = await assertProductAccess(user, id);
+    await assertProductAccess(user, id);
     const [row] = await db.select().from(products).where(eq(products.id, id)).limit(1);
     if (!row) throw new ApiError(404, "Product not found.", "NOT_FOUND");
-    const key = process.env.OPENAI_API_KEY;
-    if (!key) throw new ApiError(503, "AI content generation is not configured yet. Add OPENAI_API_KEY to the production environment.", "AI_NOT_CONFIGURED");
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: process.env.OPENAI_CONTENT_MODEL || "gpt-4o-mini",
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: "You are an expert ecommerce marketplace listing copywriter. Generate accurate, conversion-focused Arabic (natural modern Egyptian-friendly MSA) and English product listing content. Never invent specifications, certifications, dimensions, materials, guarantees, health claims or performance claims. If details are missing, omit them. Return JSON with keys en and ar; each has title, shortDescription, fullDescription, bulletPoints (array), keywords (array). Keep keywords appropriate for marketplace search. Avoid keyword stuffing." },
-          { role: "user", content: JSON.stringify({ name: row.name, sku: row.sku, brand: row.brand, category: row.category, productType: row.productType, description: row.description, specifications: row.specifications, dimensions: row.dimensions, weight: row.weight, materials: row.materials, targetAudience: row.targetAudience, marketplace: row.targetMarketplace, clientInstructions: row.clientInstructions }) }
-        ],
-        temperature: 0.4
-      })
-    });
-    const payload = await response.json();
-    if (!response.ok) throw new ApiError(502, payload.error?.message || "AI provider could not generate listing content.", "AI_PROVIDER_ERROR");
-    const raw = payload.choices?.[0]?.message?.content;
-    if (!raw) throw new ApiError(502, "AI provider returned an empty response.", "AI_EMPTY_RESPONSE");
-    const generated = JSON.parse(raw);
-    for (const locale of ["en", "ar"] as const) {
-      const content = generated[locale];
-      if (!content || typeof content.title !== "string" || !content.title.trim()) throw new ApiError(502, "AI returned incomplete bilingual content. Please retry.", "AI_INVALID_RESPONSE");
-      if (!Array.isArray(content.bulletPoints) || !Array.isArray(content.keywords)) throw new ApiError(502, "AI returned incomplete listing fields. Please retry.", "AI_INVALID_RESPONSE");
-    }
-    return NextResponse.json({ generated });
+    const source = row as unknown as Record<string, unknown>;
+    const generated = { en: buildListing(source, "en"), ar: buildListing(source, "ar") };
+    return NextResponse.json({ generated, generator: "built_in" });
   } catch (error) {
     return apiError(error);
   }
