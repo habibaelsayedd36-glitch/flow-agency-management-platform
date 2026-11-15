@@ -1,7 +1,7 @@
-import { desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray, isNotNull } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { employees, projects, users } from "@/db/schema";
+import { employees, projects, users, workflowSteps } from "@/db/schema";
 import { apiError, assertSameOrigin, optionalText, requireText } from "@/lib/api";
 import { hashPassword } from "@/lib/auth";
 import { requireActiveAccount, requireAuth } from "@/lib/authorization";
@@ -14,7 +14,18 @@ export async function GET(request: NextRequest) {
     const admin = await requireAuth(request, ["admin"]);
     requireActiveAccount(admin);
     const rows = await db.select({ user: users, employee: employees }).from(users).leftJoin(employees, eq(users.id, employees.userId)).where(inArray(users.role, [...staffRoles])).orderBy(desc(users.createdAt)).limit(500);
-    return NextResponse.json({ team: rows });
+    const tasks = await db.select({ assignedTo: workflowSteps.assignedTo, status: workflowSteps.status, deadline: workflowSteps.deadline }).from(workflowSteps).where(isNotNull(workflowSteps.assignedTo)).limit(5000);
+    const now = Date.now();
+    const workload = new Map<string, { open: number; overdue: number; inProgress: number }>();
+    for (const task of tasks) {
+      if (!task.assignedTo) continue;
+      const current = workload.get(task.assignedTo) || { open: 0, overdue: 0, inProgress: 0 };
+      const closed = ["completed", "approved", "skipped"].includes(task.status);
+      if (!closed) { current.open += 1; if (task.deadline && task.deadline.getTime() < now) current.overdue += 1; }
+      if (task.status === "in_progress") current.inProgress += 1;
+      workload.set(task.assignedTo, current);
+    }
+    return NextResponse.json({ team: rows.map((row) => ({ ...row, workload: workload.get(row.user.id) || { open: 0, overdue: 0, inProgress: 0 } })) });
   } catch (error) {
     return apiError(error);
   }
