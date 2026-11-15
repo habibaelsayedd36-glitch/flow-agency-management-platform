@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     const filters = [scope];
     if (query) filters.push(or(ilike(products.name, `%${query}%`), ilike(products.sku, `%${query}%`)));
     if (status && productStatuses.includes(status as (typeof productStatuses)[number])) filters.push(eq(products.status, status as (typeof productStatuses)[number]));
-    const rows = await db.select().from(products).where(and(...filters)).orderBy(desc(products.createdAt)).limit(200);
+    const rows = await db.select().from(products).where(and(...filters)).orderBy(desc(products.createdAt)).limit(500);
     return NextResponse.json({ products: rows });
   } catch (error) {
     return apiError(error);
