@@ -50,8 +50,16 @@ const navGroups: { label: string; items: { id: string; icon: IconName; roles?: s
   { label: "Account", items: [{ id: "settings", icon: "settings" }] },
 ];
 
-function roleLabel(role: string) {
-  return role.replaceAll("_", " ");
+function roleLabel(role: string, language: "en" | "ar" = "en") {
+  const labels: Record<string, { en: string; ar: string }> = {
+    admin: { en: "Administrator", ar: "مدير النظام" },
+    account_manager: { en: "Account manager", ar: "مدير حساب" },
+    production_manager: { en: "Production manager", ar: "مدير الإنتاج" },
+    content_creator: { en: "Content creator", ar: "منشئ المحتوى" },
+    photographer: { en: "Photographer", ar: "مصور" },
+    client: { en: "Client", ar: "عميل" },
+  };
+  return labels[role]?.[language] || role.replaceAll("_", " ");
 }
 
 function logo(variant: "green" | "white" = "green") {
@@ -66,7 +74,11 @@ export function PortalApp() {
   const [organization, setOrganization] = useState<OrganizationView | null>(null);
   const [dashboardData, setDashboardData] = useState<PortalDashboardData | null>(null);
   const [booting, setBooting] = useState(true);
-  const [language, setLanguage] = useState<"en" | "ar">("en");
+  const [language, setLanguage] = useState<"en" | "ar">(() => {
+    if (typeof window === "undefined") return "en";
+    const saved = window.localStorage.getItem("flow-language");
+    return saved === "ar" ? "ar" : "en";
+  });
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window === "undefined") return "light";
     return window.localStorage.getItem("flow-theme") === "dark" ? "dark" : "light";
@@ -79,11 +91,6 @@ export function PortalApp() {
   const [notifications, setNotifications] = useState<PortalRow[]>([]);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem("flow-language");
-    if (stored === "ar" || stored === "en") setLanguage(stored);
-  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -171,7 +178,7 @@ export function PortalApp() {
     if (notification.href) setActiveView(String(notification.href).includes("messages") ? "messages" : String(notification.href).includes("approvals") ? "approvals" : "home");
   };
 
-  const groupLabels: Record<string, string> = { Workspace: text("Workspace", "مساحة العمل"), "Production flow": text("Production flow", "سير الإنتاج"), Business: text("Business", "الأعمال"), Communication: text("Communication", "التواصل"), "FLOW team": text("FLOW team", "فريق FLOW"), Account: text("Account", "الحساب") };
+  const groupLabels: Record<string, string> = { Workspace: text("Workspace", "مساحة العمل"), "Production flow": text("Production flow", "مسار الإنتاج"), Business: text("Business", "إدارة الأعمال"), Communication: text("Communication", "التواصل"), "FLOW team": text("FLOW team", "فريق FLOW"), Account: text("Account", "الحساب") };
   const subtitleTranslations: Record<string, string> = {
     home: text("Your FLOW activity, projects, and next steps.", "نشاطك ومشروعاتك والخطوات التالية على FLOW."), projects: text("A clear view of every project and delivery milestone.", "تابع كل مشروع ومراحل التسليم بوضوح."), products: text("Your product catalog and production progress, all in one place.", "كتالوج منتجاتك ومراحل تنفيذها في مكان واحد."), production: text("Track the real workflow stages attached to each product.", "تابع مراحل تنفيذ كل منتج خطوة بخطوة."), photography: text("Review photography tasks, source files, and approved versions.", "راجع مهام التصوير والملفات الأصلية والنسخ المعتمدة."), content: text("Create and review bilingual marketplace listing versions.", "أنشئ وراجع محتوى قوائم المنتجات باللغتين."), approvals: text("Review deliverables and send clear feedback to the FLOW team.", "راجع التسليمات وأرسل ملاحظاتك لفريق FLOW."), services: text("Explore FLOW’s verified services and track your requests.", "استكشف خدمات FLOW وتابع طلباتك."), marketplace: text("View listing records and integration readiness by channel.", "تابع قوائم المنتجات وحالة ربط كل منصة."), billing: text("Review invoices, payment records, and remaining balances.", "راجع الفواتير والمدفوعات والأرصدة المستحقة."), payments: text("A traceable ledger of payment confirmations and reconciliation.", "سجل واضح لتأكيد المدفوعات ومطابقتها."), messages: text("Keep project conversations and account questions together.", "تابع محادثات المشروعات واستفسارات الحساب في مكان واحد."), reports: text("Explore activity drawn from your actual FLOW workspace records.", "اطلع على تقارير مبنية على بيانات مساحة عملك الفعلية."), settings: text("Keep your company and onboarding information up to date.", "حدّث بيانات شركتك ومعلومات التسجيل."), clients: text("Review onboarding, account assignments, and client history.", "راجع تسجيل العملاء وتوزيع الحسابات وسجل كل عميل."), deals: text("Keep the latest client agreement, commercial terms, and contract copies together.", "تابع اتفاقات العملاء والشروط التجارية ونسخ العقود."), team: text("Manage FLOW staff roles and active access.", "أدر أدوار فريق FLOW وصلاحيات الدخول."), subscriptions: text("Configure commercial terms and monitor real product usage.", "اضبط شروط الاشتراك وتابع الاستخدام الفعلي."), audit: text("A read-only history of important administrative actions.", "سجل للقراءة فقط بأهم الإجراءات الإدارية."), notifications: text("Recent updates and account alerts for your workspace.", "آخر التحديثات والتنبيهات الخاصة بمساحة عملك.")
   };
@@ -212,10 +219,10 @@ export function PortalApp() {
       <aside className="portal-sidebar">
         <div className="sidebar-brand">{logo("white")}</div>
         <div className="sidebar-workspace"><span className="company-mark">{initials(organization?.companyName || "FLOW")}</span><span className="sidebar-workspace-copy"><b>{organization?.companyName || "FLOW Agency"}</b><span>{isClient ? text("Client workspace", "مساحة عمل العميل") : text("Internal workspace", "مساحة العمل الداخلية")}</span></span></div>
-        <nav className="sidebar-nav" aria-label="Main navigation">
-          {navItems.map((group) => <div className="nav-group" key={group.label}><p className="sidebar-section-label">{groupLabels[group.label] || group.label}</p>{group.items.map((item) => <button key={item.id} type="button" className={`nav-item ${activeView === item.id ? "active" : ""}`} onClick={() => { setActiveView(item.id); setMobileNavOpen(false); }}><Icon name={item.icon} size={16} /><span>{navLabels[item.id]?.[language] || views[item.id]?.title || item.id}</span>{item.id === "approvals" && dashboardData?.stats?.awaitingApproval ? <span className="nav-count">{dashboardData.stats.awaitingApproval}</span> : item.id === "messages" && unreadCount ? <span className="nav-count">{unreadCount}</span> : null}</button>)}</div>)}
+        <nav className="sidebar-nav" aria-label={text("Main navigation", "القائمة الرئيسية")}>
+          {navItems.map((group) => <div className="nav-group" key={group.label}><p className="sidebar-section-label">{groupLabels[group.label] || group.label}</p>{group.items.map((item) => <button key={item.id} type="button" className={`nav-item ${activeView === item.id ? "active" : ""}`} onClick={() => { setActiveView(item.id); setMobileNavOpen(false); }}><Icon name={item.icon} size={16} /><span>{navLabels[item.id]?.[language] || navLabels[item.id]?.[language] || views[item.id]?.title || item.id}</span>{item.id === "approvals" && dashboardData?.stats?.awaitingApproval ? <span className="nav-count">{dashboardData.stats.awaitingApproval}</span> : item.id === "messages" && unreadCount ? <span className="nav-count">{unreadCount}</span> : null}</button>)}</div>)}
         </nav>
-        <div className="sidebar-bottom"><div className="sidebar-help"><b>{text("Need support?", "محتاج مساعدة؟")}</b><p>{text("Talk to the FLOW team about your products or next steps.", "تواصل مع فريق FLOW بخصوص منتجاتك أو خطواتك القادمة.")}</p><button type="button" onClick={() => setActiveView("messages")}>{text("Message your team", "راسل فريقك")} <Icon name="arrow" size={12} /></button></div><div className="sidebar-user"><span className={`avatar ${!isClient ? "avatar-staff" : ""}`}>{initials(user.fullName)}</span><span className="sidebar-user-details"><b>{user.fullName}</b><span>{roleLabel(user.role)}</span></span><button className="sidebar-logout" type="button" aria-label={text("Sign out", "تسجيل الخروج")} onClick={() => void logout()}><Icon name="logout" size={16} /></button></div></div>
+        <div className="sidebar-bottom"><div className="sidebar-help"><b>{text("Need support?", "محتاج مساعدة؟")}</b><p>{text("Talk to the FLOW team about your products or next steps.", "تواصل مع فريق FLOW بخصوص منتجاتك أو خطواتك القادمة.")}</p><button type="button" onClick={() => setActiveView("messages")}>{text("Message your team", "راسل فريقك")} <Icon name="arrow" size={12} /></button></div><div className="sidebar-user"><span className={`avatar ${!isClient ? "avatar-staff" : ""}`}>{initials(user.fullName)}</span><span className="sidebar-user-details"><b>{user.fullName}</b><span>{roleLabel(user.role, language)}</span></span><button className="sidebar-logout" type="button" aria-label={text("Sign out", "تسجيل الخروج")} onClick={() => void logout()}><Icon name="logout" size={16} /></button></div></div>
       </aside>
 
       <div className="portal-main">
