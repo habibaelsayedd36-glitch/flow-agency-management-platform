@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getVercelOidcToken } from "@vercel/oidc";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { products } from "@/db/schema";
@@ -74,7 +75,11 @@ ${JSON.stringify(facts)}`;
 }
 
 async function generateWithAI(prompt: string, request: NextRequest): Promise<string> {
-  const token = process.env.AI_GATEWAY_API_KEY || request.headers.get("x-vercel-oidc-token") || process.env.VERCEL_OIDC_TOKEN;
+  let oidcToken: string | undefined;
+  if (!process.env.AI_GATEWAY_API_KEY) {
+    try { oidcToken = await getVercelOidcToken(); } catch { oidcToken = process.env.VERCEL_OIDC_TOKEN; }
+  }
+  const token = process.env.AI_GATEWAY_API_KEY || oidcToken;
   if (!token) {
     throw new ApiError(503, "AI listing generation is not connected yet. Enable Vercel AI Gateway for this project; no client-side API key is required.", "AI_NOT_CONFIGURED");
   }
@@ -101,7 +106,7 @@ async function generateWithAI(prompt: string, request: NextRequest): Promise<str
   if (!response.ok) {
     const details = await response.text().catch(() => "");
     if (response.status === 401 || response.status === 403) {
-      throw new ApiError(503, "Vercel AI Gateway authentication is not enabled for this deployment yet.", "AI_AUTH_REQUIRED");
+      throw new ApiError(503, "Vercel did not provide an OIDC token to this function. Check the project OIDC configuration and redeploy.", "AI_AUTH_REQUIRED");
     }
     if (response.status === 402) {
       throw new ApiError(503, "The FLOW AI Gateway account needs credits or billing verification before it can generate listings.", "AI_CREDITS_REQUIRED");
