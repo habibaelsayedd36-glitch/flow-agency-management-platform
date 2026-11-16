@@ -10,7 +10,7 @@ import { PortalSections } from "@/components/portal-sections";
 import { formatDate, initials, requestJson, type PortalDashboardData, type PortalRow } from "@/lib/portal-types";
 
 const navLabels: Record<string, { en: string; ar: string }> = {
-  home: { en: "Overview", ar: "نظرة عامة" }, projects: { en: "Projects", ar: "المشاريع" }, products: { en: "Products", ar: "المنتجات" },
+  home: { en: "Overview", ar: "نظرة عامة" }, calendar: { en: "Calendar & deadlines", ar: "التقويم والمواعيد" }, projects: { en: "Projects", ar: "المشاريع" }, products: { en: "Products", ar: "المنتجات" },
   production: { en: "Production", ar: "الإنتاج" }, photography: { en: "Photography", ar: "التصوير" }, content: { en: "Content studio", ar: "استوديو المحتوى" },
   approvals: { en: "Approvals", ar: "الموافقات" }, services: { en: "Services", ar: "الخدمات" }, marketplace: { en: "Marketplaces", ar: "المنصات" },
   billing: { en: "Invoices", ar: "الفواتير" }, payments: { en: "Payments", ar: "المدفوعات" }, messages: { en: "Messages", ar: "الرسائل" }, reports: { en: "Reports", ar: "التقارير" },
@@ -20,6 +20,7 @@ const navLabels: Record<string, { en: string; ar: string }> = {
 
 const views: Record<string, { title: string; subtitle: string }> = {
   home: { title: "Workspace overview", subtitle: "Your FLOW activity, projects, and next steps." },
+  calendar: { title: "Calendar & deadlines", subtitle: "See project delivery dates and production deadlines in one place." },
   projects: { title: "Projects", subtitle: "A clear view of every project and delivery milestone." },
   products: { title: "Products", subtitle: "Your product catalog and production progress, all in one place." },
   production: { title: "Production board", subtitle: "Track the real workflow stages attached to each product." },
@@ -42,7 +43,7 @@ const views: Record<string, { title: string; subtitle: string }> = {
 };
 
 const navGroups: { label: string; items: { id: string; icon: IconName; roles?: string[] }[] }[] = [
-  { label: "Workspace", items: [{ id: "home", icon: "grid" }, { id: "projects", icon: "projects" }, { id: "products", icon: "products" }] },
+  { label: "Workspace", items: [{ id: "home", icon: "grid" }, { id: "calendar", icon: "calendar" }, { id: "projects", icon: "projects" }, { id: "products", icon: "products" }] },
   { label: "Production flow", items: [{ id: "production", icon: "production", roles: ["admin", "account_manager", "photographer", "content_creator", "production_manager"] }, { id: "photography", icon: "camera", roles: ["client", "admin", "account_manager", "photographer", "production_manager"] }, { id: "content", icon: "file", roles: ["client", "admin", "account_manager", "content_creator", "production_manager"] }, { id: "approvals", icon: "approvals" }] },
   { label: "Business", items: [{ id: "services", icon: "services" }, { id: "marketplace", icon: "marketplace" }, { id: "billing", icon: "billing", roles: ["client", "admin", "account_manager", "production_manager"] }, { id: "payments", icon: "receipt", roles: ["admin", "account_manager", "production_manager"] }] },
   { label: "Communication", items: [{ id: "messages", icon: "messages" }, { id: "reports", icon: "reports", roles: ["client", "admin", "account_manager", "production_manager"] }] },
