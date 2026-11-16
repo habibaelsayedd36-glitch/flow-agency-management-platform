@@ -61,11 +61,23 @@ function buildPrompt(product: Record<string, unknown>, locale: "en" | "ar", mark
   };
   const language = locale === "ar" ? "Arabic (natural, professional Modern Standard Arabic; do not translate awkwardly)" : "English (natural, professional marketplace English)";
   return `You are a senior ecommerce marketplace listing copywriter and product-content quality reviewer.
-Write a genuinely useful, conversion-focused marketplace listing in ${language}.
+Create a complete, customer-facing ecommerce listing in ${language}, not a product data summary.
 
-SOURCE OF TRUTH — use only the supplied product facts. Never invent ingredients, materials, sizes, compatibility, certifications, origin, performance, clinical/health claims, guarantees, awards, or benefits. Do not infer facts from a brand or product name. If information is missing, leave that claim out and list the missing information.
-Do not repeat field labels as bullet points. Do not pad copy with generic phrases such as "shop now", "high quality", "online shopping", or "product listing".
-Make the title readable and search-friendly without keyword stuffing. Make each bullet distinct and useful. Write a coherent full description, not a restatement of metadata. Include relevant search terms naturally and avoid competitor brands.
+STRICT FACT RULES:
+- Use only facts explicitly present in Product facts. Never invent ingredients, skin benefits, treatment claims, SPF, formulation, size, quantity, country of origin, certifications, compatibility, guarantees, awards, or performance.
+- A product name containing "Cica" does NOT prove any specific ingredient concentration, healing effect, suitability, or clinical benefit.
+- Do not turn metadata into prose. Never output lines such as "Brand: ...", "Category: ...", "Product type: ...", or a list of field labels.
+- Never use the words "online shopping", "product listing", "high quality", "shop now", or filler copy.
+- If details are missing, write neutral, useful copy based only on the product identity and format. Do not pad with invented benefits. Add precise missing facts to missingInformation.
+
+CONTENT REQUIREMENTS:
+- title: natural marketplace title, include brand + product name + product type only where supplied; no keyword stuffing.
+- shortDescription: 1–2 persuasive, specific sentences for shoppers. Never merely repeat the product name or the word cream.
+- fullDescription: 2–3 coherent paragraphs that explain what the product is and what is actually known. It must not be a metadata dump.
+- bulletPoints: 4–6 distinct shopper-facing points. If the source does not support feature claims, use safe points about the product identity, format, and information the shopper should verify; never fabricate features.
+- keywords: 8–15 relevant search phrases derived from the product name, brand, type and category. Exclude marketplace names, generic ecommerce terms, and unsupported ingredient/benefit terms.
+- Keep Arabic idiomatic and natural; do not translate awkwardly.
+- Tailor wording to the selected marketplaces without claiming guaranteed ranking or policy compliance.
 Selected marketplaces: ${marketplaces.join(", ") || "Not specified"}. Respect common marketplace listing conventions, but do not claim exact platform compliance where category-specific rules are unknown.
 Return ONLY valid JSON with this exact shape:
 {"title":"...","shortDescription":"...","fullDescription":"...","bulletPoints":["..."],"keywords":["..."],"qualityScore":0,"missingInformation":["..."]}
@@ -96,8 +108,8 @@ async function generateWithAI(prompt: string, request: NextRequest): Promise<str
         { role: "system", content: "You produce accurate, high-quality ecommerce listing copy and return strictly valid JSON." },
         { role: "user", content: prompt },
       ],
-      temperature: 0.65,
-      max_tokens: 2400,
+      temperature: 0.35,
+      max_tokens: 3200,
       response_format: { type: "json_object" },
     }),
     signal: AbortSignal.timeout(60000),
