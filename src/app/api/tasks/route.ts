@@ -74,7 +74,7 @@ export async function PATCH(request: NextRequest) {
     const [step] = await db.select().from(workflowSteps).where(eq(workflowSteps.id, body.id)).limit(1);
     if (!step) return NextResponse.json({ error: "Task not found." }, { status: 404 });
     const product = await assertProductAccess(user, step.productId);
-    const patch: Record<string, unknown> = {};
+    const patch: Partial<typeof workflowSteps.$inferInsert> = {};
     if (body.priority !== undefined) {
       if (!["low", "normal", "high", "urgent"].includes(body.priority)) return NextResponse.json({ error: "Invalid priority." }, { status: 400 });
       patch.priority = body.priority;
