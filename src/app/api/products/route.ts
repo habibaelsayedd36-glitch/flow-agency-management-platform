@@ -108,7 +108,55 @@ export async function POST(request: NextRequest) {
     });
     await writeActivity({ actorId: user.id, organizationId, entityType: "product", entityId: product.id, action: "product.submitted", description: `${product.name} was submitted for production.`, visibility: "client" });
     await writeAudit({ actorId: user.id, organizationId, action: "product.created", entityType: "product", entityId: product.id, newValue: { name: product.name, status: product.status } });
-    return NextResponse.json({ product }, { status: 201 });
+
+    // Automatic bilingual listing is intentionally admin-only. Product creation
+    // remains successful even if the optional AI service is unavailable.
+    let autoListing: { status: "generated" | "failed" | "not_enabled"; message?: string } = { status: "not_enabled" };
+    if (user.role === "admin") {
+      try {
+        const origin = request.nextUrl.origin;
+        const cookie = request.headers.get("cookie") || "";
+        const originHeader = request.headers.get("origin") || origin;
+        const generatedResponse = await fetch(new URL(`/api/products/${product.id}/content/generate`, origin), {
+          method: "POST",
+          headers: { cookie, origin: originHeader, "content-type": "application/json" },
+          cache: "no-store",
+          signal: AbortSignal.timeout(120000),
+        });
+        const generatedPayload = await generatedResponse.json() as {
+          generated?: Record<"en" | "ar", {
+            title: string; shortDescription: string; fullDescription: string;
+            bulletPoints: string[]; keywords: string[];
+          }>;
+          error?: string;
+        };
+        if (!generatedResponse.ok || !generatedPayload.generated?.en || !generatedPayload.generated?.ar) {
+          throw new Error(generatedPayload.error || "Automatic listing generation is unavailable.");
+        }
+        for (const language of ["en", "ar"] as const) {
+          const listing = generatedPayload.generated[language];
+          const savedResponse = await fetch(new URL(`/api/products/${product.id}/content`, origin), {
+            method: "POST",
+            headers: { cookie, origin: originHeader, "content-type": "application/json" },
+            body: JSON.stringify({ language, ...listing, status: "draft" }),
+            cache: "no-store",
+            signal: AbortSignal.timeout(30000),
+          });
+          if (!savedResponse.ok) {
+            const savedPayload = await savedResponse.json().catch(() => ({})) as { error?: string };
+            throw new Error(savedPayload.error || `Could not save the ${language} listing draft.`);
+          }
+        }
+        autoListing = { status: "generated", message: "Arabic and English drafts were created for admin review." };
+      } catch (error) {
+        console.error("FLOW admin automatic listing failed", { productId: product.id, error });
+        autoListing = {
+          status: "failed",
+          message: error instanceof Error ? error.message : "Automatic listing generation failed. The product was saved; retry from Content Studio.",
+        };
+      }
+    }
+    return NextResponse.json({ product, autoListing }, { status: 201 });
   } catch (error) {
     return apiError(error);
   }
