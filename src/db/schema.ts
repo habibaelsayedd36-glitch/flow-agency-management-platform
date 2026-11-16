@@ -308,7 +308,17 @@ export const workflowSteps = pgTable(
   (table) => [index("flow_workflow_product_order_idx").on(table.productId, table.stageOrder), index("flow_workflow_assignee_idx").on(table.assignedTo)],
 );
 
-export const productContents = pgTable(
+
+export const automationRules = pgTable(
+  "flow_automation_rules",
+  {
+    key: varchar("key", { length: 60 }).primaryKey(),
+    enabled: boolean("enabled").notNull().default(true),
+    updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" }),
+    updatedAt: createdAt(),
+  },
+);
+\nexport const productContents = pgTable(
   "flow_product_contents",
   {
     id: uuid("id").defaultRandom().primaryKey(),
