@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
       status: workflowSteps.status,
       deadline: workflowSteps.deadline,
       assignedTo: workflowSteps.assignedTo,
-      assignedName: users.name,
+      assignedName: users.fullName,
       clientVisible: workflowSteps.clientVisible,
       productName: products.name,
       sku: products.sku,
