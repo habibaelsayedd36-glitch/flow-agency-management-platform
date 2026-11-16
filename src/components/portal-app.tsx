@@ -181,7 +181,7 @@ export function PortalApp() {
       } catch (error) { showToast(error instanceof Error ? error.message : "Could not update notification.", true); }
     }
     setNotificationOpen(false);
-    if (notification.href) setActiveView(String(notification.href).includes("messages") ? "messages" : String(notification.href).includes("approvals") ? "approvals" : "home");
+    if (notification.href) setActiveView(String(notification.href).includes("tasks") ? "tasks" : String(notification.href).includes("messages") ? "messages" : String(notification.href).includes("approvals") ? "approvals" : "home");
   };
 
   const groupLabels: Record<string, string> = { Workspace: text("Workspace", "مساحة العمل"), "Production flow": text("Production flow", "مسار الإنتاج"), Business: text("Business", "إدارة الأعمال"), Communication: text("Communication", "التواصل"), "FLOW team": text("FLOW team", "فريق FLOW"), Intelligence: text("Intelligence", "التحليلات الذكية"), Account: text("Account", "الحساب") };
