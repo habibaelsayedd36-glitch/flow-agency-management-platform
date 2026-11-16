@@ -10,6 +10,13 @@
       "breakpoints": true
     },
     {
+      "idx": 1,
+      "version": "7",
+      "when": 1794720000000,
+      "tag": "0001_client_deals",
+      "breakpoints": true
+    },
+    {
       "idx": 2,
       "version": "7",
       "when": 1794820000000,
