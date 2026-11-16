@@ -282,40 +282,60 @@ function ContentProduct({ product, user, language, onOpenModal, onToast, onRefre
   const t = (en: string, ar: string) => language === "ar" ? ar : en;
   const [versions, setVersions] = useState<PortalRow[]>([]);
   const [expanded, setExpanded] = useState(false);
-  const canEdit = ["admin", "account_manager", "content_creator", "production_manager"].includes(user.role);
   const [generating, setGenerating] = useState(false);
-  const [autoGenerationAttempted, setAutoGenerationAttempted] = useState(false);
+  const [loadingVersions, setLoadingVersions] = useState(false);
+  const canEdit = ["admin", "account_manager", "content_creator", "production_manager"].includes(user.role);
+  const loadVersions = async () => {
+    setLoadingVersions(true);
+    try {
+      const result = await requestJson<{ versions: PortalRow[] }>(`/api/products/${product.id}/content`);
+      setVersions(result.versions || []);
+    } catch (error) {
+      onToast(error instanceof Error ? error.message : t("Could not load listing versions.", "تعذر تحميل نسخ المحتوى."), true);
+    } finally { setLoadingVersions(false); }
+  };
+  useEffect(() => { void loadVersions(); }, [product.id]);
   const generateBilingual = async () => {
     setGenerating(true);
     try {
       const result = await requestJson<{ generated: Record<"en" | "ar", PortalRow> }>(`/api/products/${product.id}/content/generate`, { method: "POST" });
+      const saved: PortalRow[] = [];
       for (const locale of ["en", "ar"] as const) {
         const version = result.generated[locale];
-        await requestJson(`/api/products/${product.id}/content`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ language: locale, title: version.title, shortDescription: version.shortDescription, fullDescription: version.fullDescription, bulletPoints: version.bulletPoints, keywords: version.keywords, status: "draft" }) });
+        const response = await requestJson<{ content: PortalRow; unchanged?: boolean }>(`/api/products/${product.id}/content`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ language: locale, title: version.title, shortDescription: version.shortDescription, fullDescription: version.fullDescription, bulletPoints: version.bulletPoints, keywords: version.keywords, status: "draft" })
+        });
+        saved.push(response.content);
       }
-      onToast(t("Arabic and English drafts generated and saved. Review before approval.", "تم إنشاء وحفظ مسودتي العربية والإنجليزية. راجعيهما قبل الاعتماد."));
-      const refreshed = await requestJson<{ versions: PortalRow[] }>(`/api/products/${product.id}/content`);
-      setVersions(refreshed.versions);
+      setVersions((current) => {
+        const byId = new Map(current.map((item) => [item.id, item]));
+        saved.forEach((item) => byId.set(item.id, item));
+        return [...byId.values()].sort((a,b) => Number(b.version)-Number(a.version));
+      });
       setExpanded(true);
+      onToast(t("Professional Arabic and English listing drafts saved. Review the facts before approval.", "تم حفظ مسودتي Listing بالعربية والإنجليزية. راجعي المعلومات قبل الاعتماد."));
       onRefresh();
-    } catch (error) { onToast(error instanceof Error ? error.message : t("Could not generate listing content.", "تعذر إنشاء محتوى المنتج."), true); }
-    finally { setGenerating(false); }
+    } catch (error) {
+      onToast(error instanceof Error ? error.message : t("Could not generate listing content.", "تعذر إنشاء محتوى المنتج."), true);
+    } finally { setGenerating(false); }
   };
-  useEffect(() => {
-    let active = true;
-    if (!canEdit || autoGenerationAttempted) return () => { active = false; };
-    setAutoGenerationAttempted(true);
-    requestJson<{ versions: PortalRow[] }>(`/api/products/${product.id}/content`)
-      .then(async (result) => {
-        if (!active) return;
-        setVersions(result.versions);
-        if (!result.versions.length) await generateBilingual();
-      })
-      .catch((error) => { if (active) onToast(error instanceof Error ? error.message : "Could not load listing versions.", true); });
-    return () => { active = false; };
-  }, [product.id]);
   const marketplaceNames = Array.isArray(product.targetMarketplaces) ? product.targetMarketplaces.join(" · ") : product.targetMarketplace || t("Marketplace not selected", "لم يتم اختيار منصة");
-  return <article className="content-product-card" dir={language === "ar" ? "rtl" : "ltr"}><div className="content-product-head"><span className="content-product-icon"><Icon name="file" size={18} /></span><span className="content-product-name"><b>{product.name}</b><small>{product.sku || t("SKU not set", "لم يتم تحديد SKU")} · {marketplaceNames}</small></span><Badge status={product.status} /><button type="button" className="icon-button" aria-label={t("Open content versions", "فتح نسخ المحتوى")} title={t("Open content versions", "فتح نسخ المحتوى")} onClick={() => setExpanded((current) => !current)}><Icon name="chevron" size={16} /></button></div>{expanded && <div className="content-product-expanded">{canEdit && <button type="button" className="button button-primary button-small" disabled={generating} onClick={() => void generateBilingual()}><Icon name="check" size={14} />{generating ? t("Creating Arabic + English…", "جارٍ إعداد العربية والإنجليزية…") : t("Generate both languages automatically", "إنشاء النسختين تلقائيًا")}</button>}{versions.length ? versions.map((version) => <div className="content-preview" key={version.id} dir={version.language === "ar" ? "rtl" : "ltr"}><div className="content-version-head"><b>{version.title}</b><span className="version-language">{version.language === "ar" ? t("Arabic", "العربية") : t("English", "الإنجليزية")} · v{version.version}</span><Badge status={version.status} /></div>{version.shortDescription && <p>{version.shortDescription}</p>}{version.fullDescription && <details><summary>{t("Full description", "الوصف الكامل")}</summary><p>{version.fullDescription}</p></details>}{version.bulletPoints?.length > 0 && <ul>{version.bulletPoints.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>}{version.keywords?.length > 0 && <small>{t("Keywords", "الكلمات المفتاحية")}: {version.keywords.join(" · ")}</small>}</div>) : <p className="empty-inline">{t("No saved versions yet. Generate both languages automatically.", "لا توجد نسخ محفوظة حتى الآن. أنشئي النسختين تلقائيًا.")}</p>}{canEdit && <button type="button" className="button button-secondary button-small" onClick={() => onOpenModal("content", { id: product.id, name: product.name })}><Icon name="plus" size={14} />{t("Create language version", "إنشاء نسخة لغوية")}</button>}</div>}</article>;
+  const sortedVersions = [...versions].sort((a,b)=>Number(b.version)-Number(a.version));
+  return <article className="content-product-card" dir={language === "ar" ? "rtl" : "ltr"}>
+    <div className="content-product-head"><span className="content-product-icon"><Icon name="file" size={18} /></span><span className="content-product-name"><b>{product.name}</b><small>{product.sku || t("SKU not set", "لم يتم تحديد SKU")} · {marketplaceNames}</small></span><Badge status={product.status} /><button type="button" className="icon-button" aria-label={t("Open content versions", "فتح نسخ المحتوى")} title={t("Open content versions", "فتح نسخ المحتوى")} onClick={() => setExpanded((current) => !current)}><Icon name="chevron" size={16} /></button></div>
+    {expanded && <div className="content-product-expanded">
+      {canEdit && <div className="content-generation-panel"><div><b>{t("Create marketplace-ready copy", "إنشاء محتوى جاهز للمتاجر")}</b><small>{t("Generates separate Arabic and English titles, descriptions, bullet points and search keywords. Uses confirmed product facts only.", "ينشئ عنوانًا ووصفًا ونقاط بيع وكلمات بحث مستقلة بالعربية والإنجليزية، اعتمادًا على معلومات المنتج المؤكدة فقط.")}</small></div><button type="button" className="button button-primary button-small" disabled={generating} onClick={() => void generateBilingual()}><Icon name="spark" size={14} />{generating ? t("Generating both languages…", "جارٍ إنشاء النسختين…") : t("Generate both languages", "إنشاء النسختين")}</button></div>}
+      {loadingVersions ? <p className="empty-inline">{t("Loading saved versions…", "جارٍ تحميل النسخ المحفوظة…")}</p> : sortedVersions.length ? sortedVersions.map((version) => <div className="content-preview" key={version.id} dir={version.language === "ar" ? "rtl" : "ltr"}>
+        <div className="content-version-head"><b>{version.title}</b><span className="version-language">{version.language === "ar" ? t("Arabic", "العربية") : t("English", "الإنجليزية")} · v{version.version}</span><Badge status={version.status} /></div>
+        {version.shortDescription && <p className="listing-short-description">{version.shortDescription}</p>}
+        {version.bulletPoints?.length > 0 && <ul className="listing-bullet-points">{version.bulletPoints.map((item: string, index: number) => <li key={index}>{item}</li>)}</ul>}
+        {version.fullDescription && <details><summary>{t("Full description", "الوصف الكامل")}</summary><p>{version.fullDescription}</p></details>}
+        {version.keywords?.length > 0 && <div className="listing-keywords"><b>{t("Search keywords", "كلمات البحث")}</b><small>{version.keywords.join(" · ")}</small></div>}
+      </div>) : <p className="empty-inline">{t("No saved versions yet. Generate both languages to create your first marketplace listing.", "لا توجد نسخ محفوظة. أنشئي النسختين لبدء إعداد محتوى المنتج للمتاجر.")}</p>}
+      {canEdit && <button type="button" className="button button-secondary button-small" onClick={() => onOpenModal("content", { id: product.id, name: product.name })}><Icon name="plus" size={14} />{t("Create language version", "إنشاء نسخة لغوية")}</button>}
+    </div>}
+  </article>;
 }
 
 function ApprovalsView({ approvals, user, language, onToast, onRefresh }: { approvals: PortalRow[]; user: AuthUserView; language: "en" | "ar"; onToast: Props["onToast"]; onRefresh: Props["onRefresh"] }) {
