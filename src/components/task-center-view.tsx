@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/flow-icons";
 import type { AuthUserView } from "@/components/auth-screen";
 import { requestJson, type PortalRow } from "@/lib/portal-types";
@@ -15,7 +15,7 @@ export function TaskCenterView({ language, user, refreshToken, onNavigate }: Pro
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
-  useMemo(() => {
+  useEffect(() => {
     let active = true;
     setLoading(true); setError("");
     requestJson<{ tasks: PortalRow[]; summary: PortalRow }>("/api/tasks")
