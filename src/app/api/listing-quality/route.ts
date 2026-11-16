@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray, type SQL } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { productContents, products, projects, workflowSteps } from "@/db/schema";
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request, ["admin", "production_manager", "account_manager", "content_creator"]);
     requireActiveAccount(user);
-    let productScope;
+    let productScope: SQL | undefined;
     if (user.role === "account_manager") {
       const assigned = await db.select({ organizationId: projects.organizationId }).from(projects).where(eq(projects.accountManagerId, user.id));
       const orgIds = [...new Set(assigned.map((row) => row.organizationId))];
