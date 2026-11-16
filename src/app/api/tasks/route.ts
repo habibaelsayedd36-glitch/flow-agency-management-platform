@@ -104,7 +104,7 @@ export async function PATCH(request: NextRequest) {
     if (!Object.keys(patch).length) return NextResponse.json({ error: "No task changes were provided." }, { status: 400 });
     const [updated] = await db.update(workflowSteps).set(patch).where(eq(workflowSteps.id, step.id)).returning();
     await writeActivity({ actorId: user.id, organizationId: product.organizationId, entityType: "product", entityId: product.id, action: "workflow.task_updated", description: `Workflow task “${step.stageLabel}” was updated.`, visibility: "internal" });
-    await writeAudit({ actorId: user.id, organizationId: product.organizationId, action: "workflow.task_updated", entityType: "workflow_step", entityId: step.id, oldValue: { priority: step.priority, assignedTo: step.assignedTo, deadline: step.deadline, status: step.status }, newValue: patch });
+    await writeAudit({ actorId: user.id, organizationId: product.organizationId, action: "workflow.task_updated", entityType: "workflow_step", entityId: step.id, previousValue: { assignedTo: step.assignedTo, deadline: step.deadline, status: step.status }, newValue: patch });
     return NextResponse.json({ task: updated });
   } catch (error) {
     return apiError(error);
