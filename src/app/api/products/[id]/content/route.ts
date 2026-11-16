@@ -40,6 +40,18 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     const bullets = cleanList(body.bulletPoints, 10);
     const keywords = cleanList(body.keywords, 30);
     const specifications = body.specifications && typeof body.specifications === "object" && !Array.isArray(body.specifications) ? body.specifications as Record<string, string> : {};
+    const latest = await db.select().from(productContents)
+      .where(eq(productContents.productId, id))
+      .orderBy(desc(productContents.version))
+      .limit(20);
+    const sameLanguage = latest.find((row) => row.language === language);
+    const sameContent = sameLanguage
+      && sameLanguage.title === title
+      && (sameLanguage.shortDescription || "") === (shortDescription || "")
+      && (sameLanguage.fullDescription || "") === (fullDescription || "")
+      && JSON.stringify(sameLanguage.bulletPoints || []) === JSON.stringify(bullets)
+      && JSON.stringify(sameLanguage.keywords || []) === JSON.stringify(keywords);
+    if (sameContent) return NextResponse.json({ content: sameLanguage, unchanged: true });
     const previousRows = await db.select({ version: productContents.version }).from(productContents).where(eq(productContents.productId, id)).orderBy(desc(productContents.version)).limit(1);
     const version = (previousRows[0]?.version ?? 0) + 1;
     const status = body.status === "ready_for_client" && ["admin", "account_manager", "production_manager"].includes(user.role) ? "ready_for_client" : "draft";
