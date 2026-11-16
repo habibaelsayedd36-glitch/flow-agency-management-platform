@@ -153,6 +153,18 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       en: parseListing(englishRaw, "en"),
       ar: parseListing(arabicRaw, "ar"),
     };
+    for (const locale of ["en", "ar"] as const) {
+      const listing = generated[locale];
+      const combined = [listing.title, listing.shortDescription, listing.fullDescription, ...listing.bulletPoints].join(" ").toLowerCase();
+      const forbidden = ["brand:", "category:", "product type:", "العلامة التجارية:", "الفئة:", "نوع المنتج:", "online shopping", "product listing"];
+      const metadataDump = forbidden.some((phrase) => combined.includes(phrase));
+      const wordCount = listing.fullDescription.split(/\\s+/).filter(Boolean).length;
+      if (listing.title.length < 12 || listing.shortDescription.length < 45 || wordCount < 35 || listing.bulletPoints.length < 3 || listing.keywords.length < 5 || metadataDump) {
+        throw new ApiError(422, locale === "ar"
+          ? "المعلومات المتاحة عن المنتج غير كافية لإنتاج Listing احترافي. أضيفي وصفًا ومميزات ومواصفات مؤكدة للمنتج ثم أعيدي المحاولة."
+          : "There is not enough verified product information to create a professional listing. Add a product description, real features and confirmed specifications, then try again.", "INSUFFICIENT_PRODUCT_INFORMATION");
+      }
+    }
     return NextResponse.json({ generated, generator: "vercel_ai_gateway", model: process.env.AI_GATEWAY_MODEL || "alibaba/qwen-3-235b" });
   } catch (error) {
     return apiError(error);
