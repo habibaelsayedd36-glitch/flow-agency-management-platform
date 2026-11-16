@@ -14,8 +14,8 @@ function cleanList(value: unknown, maximum: number) {
 function isLegacyMetadataDraft(row: typeof productContents.$inferSelect) {
   if (row.status !== "draft") return false;
   const copy = [row.title, row.shortDescription, row.fullDescription, ...(row.bulletPoints || [])].filter(Boolean).join(" ").toLowerCase();
-  const hasMetadataLabels = /(?:brand|category|product type|العلامة التجارية|الفئة|نوع المنتج)\\s*:/i.test(copy);
-  const descriptionWords = (row.fullDescription || "").trim().split(/\\s+/).filter(Boolean).length;
+  const hasMetadataLabels = /(?:brand|category|product type|العلامة التجارية|الفئة|نوع المنتج)\s*:/i.test(copy);
+  const descriptionWords = (row.fullDescription || "").trim().split(/\s+/).filter(Boolean).length;
   return hasMetadataLabels && descriptionWords < 35;
 }
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     const visible = rows.filter((row) => !isLegacyMetadataDraft(row) && (user.role !== "client" || ["ready_for_client", "approved"].includes(row.status)));
     const seen = new Set<string>();
     const versions = visible.filter((row) => {
-      const signature = [row.language, row.title, row.shortDescription, row.fullDescription, JSON.stringify(row.bulletPoints || []), JSON.stringify(row.keywords || [])].join("|").toLowerCase().replace(/\\s+/g, " ").trim();
+      const signature = [row.language, row.title, row.shortDescription, row.fullDescription, JSON.stringify(row.bulletPoints || []), JSON.stringify(row.keywords || [])].join("|").toLowerCase().replace(/\s+/g, " ").trim();
       if (seen.has(signature)) return false;
       seen.add(signature);
       return true;
