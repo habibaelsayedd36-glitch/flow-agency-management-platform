@@ -296,6 +296,7 @@ export const workflowSteps = pgTable(
     stageLabel: varchar("stage_label", { length: 120 }).notNull(),
     stageOrder: smallint("stage_order").notNull(),
     status: varchar("status", { length: 24 }).notNull().default("pending"),
+    priority: varchar("priority", { length: 16 }).notNull().default("normal"),
     assignedTo: uuid("assigned_to").references(() => users.id, { onDelete: "set null" }),
     deadline: timestamp("deadline", { withTimezone: true }),
     startedAt: timestamp("started_at", { withTimezone: true }),
