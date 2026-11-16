@@ -11,6 +11,14 @@ function cleanList(value: unknown, maximum: number) {
   return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0).map((item) => item.trim().slice(0, 500)).slice(0, maximum);
 }
 
+function isLegacyMetadataDraft(row: typeof productContents.$inferSelect) {
+  if (row.status !== "draft") return false;
+  const copy = [row.title, row.shortDescription, row.fullDescription, ...(row.bulletPoints || [])].filter(Boolean).join(" ").toLowerCase();
+  const hasMetadataLabels = /(?:brand|category|product type|العلامة التجارية|الفئة|نوع المنتج)\\s*:/i.test(copy);
+  const descriptionWords = (row.fullDescription || "").trim().split(/\\s+/).filter(Boolean).length;
+  return hasMetadataLabels && descriptionWords < 35;
+}
+
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuth(request);
@@ -18,7 +26,15 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     const { id } = await context.params;
     await assertProductAccess(user, id);
     const rows = await db.select().from(productContents).where(eq(productContents.productId, id)).orderBy(desc(productContents.version));
-    return NextResponse.json({ versions: rows.filter((row) => user.role !== "client" || ["ready_for_client", "approved"].includes(row.status)) });
+    const visible = rows.filter((row) => !isLegacyMetadataDraft(row) && (user.role !== "client" || ["ready_for_client", "approved"].includes(row.status)));
+    const seen = new Set<string>();
+    const versions = visible.filter((row) => {
+      const signature = [row.language, row.title, row.shortDescription, row.fullDescription, JSON.stringify(row.bulletPoints || []), JSON.stringify(row.keywords || [])].join("|").toLowerCase().replace(/\\s+/g, " ").trim();
+      if (seen.has(signature)) return false;
+      seen.add(signature);
+      return true;
+    });
+    return NextResponse.json({ versions });
   } catch (error) {
     return apiError(error);
   }
