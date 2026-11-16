@@ -1471,3 +1471,22 @@ html[dir="ltr"] .portal-shell {
 .calendar-event-date{white-space:nowrap}
 .calendar-workspace .module-loading{display:flex;align-items:center;gap:10px;padding:22px}
 @media(max-width:680px){.calendar-summary-grid{grid-template-columns:1fr 1fr}.calendar-summary-grid .listing-ops-card:last-child{grid-column:1/-1}.calendar-toolbar{align-items:flex-start;flex-direction:column;gap:12px}.calendar-actions{width:100%}.calendar-actions .button{flex:1}.calendar-grid{gap:3px}.calendar-day{min-height:49px;padding:6px 2px;border-radius:7px}.calendar-weekday{font-size:9px;padding:6px 0}.calendar-event-row{gap:8px;flex-wrap:wrap}.calendar-event-main{flex-basis:calc(100% - 35px)}.calendar-event-date{margin-inline-start:17px}.calendar-event-row .status-badge{margin-inline-start:auto}}
+
+
+/* FLOW task center */
+.task-center-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:18px}
+.task-center-head{align-items:flex-start;gap:16px}
+.task-center-controls{display:grid;gap:12px;margin:18px 0}
+.task-filter-row{display:flex;gap:7px;flex-wrap:wrap}
+.task-filter-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;margin-inline-start:5px;padding:0 4px;border-radius:20px;background:var(--surface-muted);font-size:10px}
+.task-list{display:grid}
+.task-row{display:flex;align-items:center;gap:13px;padding:14px 2px;border-top:1px solid var(--line);min-width:0}
+.task-stage-icon{width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border-radius:10px;background:var(--surface-muted);color:var(--accent)}
+.task-row-main{display:flex;flex:1;min-width:120px;flex-direction:column;gap:5px}
+.task-row-main b{font-size:13px}
+.task-row-main span,.task-row-owner small,.task-row-date small{font-size:11px;color:var(--muted)}
+.task-row-owner,.task-row-date{display:flex;min-width:105px;flex-direction:column;gap:5px}
+.task-row-owner b,.task-row-date b{font-size:12px;font-weight:600}
+.task-row.task-overdue{background:color-mix(in srgb,var(--danger) 4%,transparent)}
+.task-row .status-badge.overdue{color:var(--danger)}
+@media(max-width:760px){.task-center-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.task-center-head{flex-direction:column}.task-center-head>.button{width:100%}.task-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:9px}.task-row-main{grid-column:2}.task-row-owner{grid-column:2;grid-row:2}.task-row-date{grid-column:2;grid-row:3}.task-row .status-badge{grid-column:3;grid-row:1}.task-row>.button{grid-column:3;grid-row:2 / span 2;align-self:center}}
