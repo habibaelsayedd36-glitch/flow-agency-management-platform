@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray, isNull } from "drizzle-orm";
+import { and, eq, gte, inArray } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { automationRules, notifications, products, users, workflowSteps } from "@/db/schema";
