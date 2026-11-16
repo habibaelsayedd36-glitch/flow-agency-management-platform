@@ -1,7 +1,7 @@
-import { asc, count, eq, inArray } from "drizzle-orm";
+import { asc, eq, inArray } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { marketplaceListings, marketplaces, organizations, products, projects } from "@/db/schema";
+import { marketplaceListings, marketplaces, organizations, products } from "@/db/schema";
 import { apiError } from "@/lib/api";
 import { canAccessOrganization, requireActiveAccount, requireAuth } from "@/lib/authorization";
 
