@@ -4,6 +4,7 @@ import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { Icon, type IconName } from "@/components/flow-icons";
 import { DealsView } from "@/components/deals-view";
 import { CalendarView } from "@/components/calendar-view";
+import { TaskCenterView } from "@/components/task-center-view";
 import { type AuthUserView, type OrganizationView } from "@/components/auth-screen";
 import type { ModalName, PortalModal, ModalState } from "@/components/portal-modal";
 import { formatDate, formatMoney, requestJson, statusLabel, titleCase, type PortalRow } from "@/lib/portal-types";
@@ -91,6 +92,7 @@ export function PortalSections(props: Props) {
   }, [view, refreshToken, loadVersion, user.role, user.organizationId]);
 
   if (view === "calendar") return <CalendarView language={language} onNavigate={onNavigate} />;
+  if (view === "tasks") return <TaskCenterView language={language} user={user} refreshToken={refreshToken} onNavigate={onNavigate} />;
   if (view === "settings") return <SettingsView user={user} organization={organization} language={language} onToast={onToast} onRefresh={onRefresh} />;
   if (loading) return <LoadingPanel />;
   if (error) return <SectionMessage error={error} retry={reload} />;
