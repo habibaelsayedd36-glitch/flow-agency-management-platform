@@ -318,7 +318,7 @@ export const automationRules = pgTable(
     updatedAt: createdAt(),
   },
 );
-\nexport const productContents = pgTable(
+export const productContents = pgTable(
   "flow_product_contents",
   {
     id: uuid("id").defaultRandom().primaryKey(),
